@@ -200,7 +200,7 @@ governing permissions and limitations under the License. -->
                             <assertions>
                                 <enable/>
                             </assertions>
-                            <parallelism>${tests.jvms}</parallelism>
+                            <parallelism>1</parallelism>
                             <balancers>
                                 <execution-times>
                                     <fileset dir="${basedir}" includes=".local-execution-hints.log"/>
