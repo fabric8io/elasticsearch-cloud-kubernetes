@@ -1,26 +1,6 @@
-/*
- * Licensed to Elasticsearch under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
-package org.elasticsearch.discovery.gce;
+package io.fabric8.discovery.k8s;
 
 import org.elasticsearch.Version;
-import org.elasticsearch.cloud.gce.GceComputeService;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.ClusterService;
 import org.elasticsearch.cluster.node.DiscoveryNodeService;
@@ -40,12 +20,12 @@ import org.elasticsearch.transport.TransportService;
 /**
  *
  */
-public class GceDiscovery extends ZenDiscovery {
+public class K8sDiscovery extends ZenDiscovery {
 
     @Inject
-    public GceDiscovery(Settings settings, ClusterName clusterName, ThreadPool threadPool, TransportService transportService,
+    public K8sDiscovery(Settings settings, ClusterName clusterName, ThreadPool threadPool, TransportService transportService,
                         ClusterService clusterService, NodeSettingsService nodeSettingsService, ZenPingService pingService,
-                        DiscoveryNodeService discoveryNodeService, GceComputeService gceComputeService,
+                        DiscoveryNodeService discoveryNodeService,
                         NetworkService networkService, DiscoverySettings discoverySettings) {
         super(settings, clusterName, threadPool, transportService, clusterService, nodeSettingsService,
                 discoveryNodeService, pingService, Version.CURRENT, discoverySettings);
@@ -62,11 +42,10 @@ public class GceDiscovery extends ZenDiscovery {
             if (unicastZenPing != null) {
                 // update the unicast zen ping to add cloud hosts provider
                 // and, while we are at it, use only it and not the multicast for example
-                unicastZenPing.addHostsProvider(new GceUnicastHostsProvider(settings, gceComputeService,
-                        transportService, networkService));
+                unicastZenPing.addHostsProvider(new K8sUnicastHostsProvider(settings, transportService, networkService));
                 pingService.zenPings(ImmutableList.of(unicastZenPing));
             } else {
-                logger.warn("failed to apply gce unicast discovery, no unicast ping found");
+                logger.warn("failed to apply k8s unicast discovery, no unicast ping found");
             }
         }
     }
