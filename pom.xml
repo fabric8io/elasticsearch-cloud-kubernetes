@@ -294,12 +294,18 @@ governing permissions and limitations under the License. -->
             <plugin>
                 <groupId>org.jolokia</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
-                <version>0.9.10</version>
+                <version>0.10.5</version>
                 <configuration>
-                    <dataBaseImage>dockerfile/elasticsearch:latest</dataBaseImage>
-                    <dataImage>fabric8/elasticsearch-k8s</dataImage>
-                    <assemblyDescriptor>${basedir}/src/main/assemblies/docker-image.xml</assemblyDescriptor>
-                    <dataExportDir>/data/</dataExportDir>
+                    <images>
+                        <image>
+                            <name>fabric8/elasticsearch-k8s</name>
+                            <build>
+                                <from>dockerfile/elasticsearch:latest</from>
+                                <assemblyDescriptor>${basedir}/src/main/assemblies/docker-image.xml</assemblyDescriptor>
+                                <exportDir>/data/</exportDir>
+                            </build>
+                        </image>
+                    </images>
                 </configuration>
             </plugin>
         </plugins>
