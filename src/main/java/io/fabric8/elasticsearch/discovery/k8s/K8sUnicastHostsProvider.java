@@ -121,11 +121,11 @@ public class K8sUnicastHostsProvider extends AbstractComponent implements Unicas
                     if (podIp.equals(ipAddress)) {
                         // We found the current node.
                         // We can ignore it in the list of DiscoveryNode
-                        logger.error("current node found. Ignoring {} - {}", pod.getId(), podIp);
+                        logger.trace("current node found. Ignoring {} - {}", pod.getId(), podIp);
                     } else {
                         List<ManifestContainer> containers = KubernetesHelper.getContainers(pod);
                         for (ManifestContainer container : containers) {
-                            logger.error("pod " + pod.getId() + " container: " + container.getName() + " image: " + container.getImage());
+                            logger.trace("pod " + pod.getId() + " container: " + container.getName() + " image: " + container.getImage());
                             List<Port> ports = container.getPorts();
                             for (Port port : ports) {
                                 Integer containerPort = port.getContainerPort();
@@ -135,8 +135,8 @@ public class K8sUnicastHostsProvider extends AbstractComponent implements Unicas
                                     // pod IP is a single IP Address. We need to build a TransportAddress from it
                                     TransportAddress[] addresses = transportService.addressesFromString(address);
 
-                                    logger.error("adding {}, address {}, transport_address {}, status {}", pod.getId(),
-                                            podIp, addresses[0], status);
+                                    logger.trace("adding {}, address {}, transport_address {}, status {}", pod.getId(),
+                                        podIp, addresses[0], status);
                                     cachedDiscoNodes.add(new DiscoveryNode("#cloud-" + pod.getId() + "-" + 0, addresses[0], Version.CURRENT));
                                 }
                             }
