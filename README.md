@@ -3,7 +3,7 @@ Kubernetes Cloud Plugin for Elasticsearch
 
 The Kubernetes Cloud plugin allows to use Kubernetes API for the unicast discovery mechanism.
 
-## Version 1.0.0 for Elasticsearch: 1.3
+## Version 1.0.0 for Elasticsearch: 1.4
 
 Kubernetes Pod Discovery
 ===============================
@@ -14,9 +14,9 @@ Here is a simple sample configuration:
 ```yaml
 cloud:
   k8s:
-      selector: name=elasticsearch
+    selector: ${SELECTOR}
 discovery:
-      type: io.fabric8.elasticsearch.discovery.k8s.K8sDiscoveryModule
+    type: io.fabric8.elasticsearch.discovery.k8s.K8sDiscoveryModule
 
 path:
   data: /data/data
@@ -24,3 +24,5 @@ path:
   plugins: /data/plugins
   work: /data/work
 ```
+
+You can then set the `SELECTOR` environment variable to specify the selector for your Elasticsearch pods, e.g. `cluster=myCluster,component=elasticsearch`.
