@@ -1,6 +1,6 @@
 cloud:
   k8s:
-    selector: name=elasticsearch
+    selector: ${SELECTOR}
 discovery:
   type: io.fabric8.elasticsearch.discovery.k8s.K8sDiscoveryModule
 
