@@ -1,4 +1,4 @@
-package io.fabric8.discovery.k8s;
+package io.fabric8.elasticsearch.discovery.k8s;
 
 import org.elasticsearch.discovery.Discovery;
 import org.elasticsearch.discovery.zen.ZenDiscoveryModule;

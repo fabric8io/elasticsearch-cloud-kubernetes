@@ -16,7 +16,7 @@ cloud:
   k8s:
       selector: name=elasticsearch
 discovery:
-      type: io.fabric8.discovery.k8s.K8sDiscoveryModule
+      type: io.fabric8.elasticsearch.discovery.k8s.K8sDiscoveryModule
 
 path:
   data: /data/data

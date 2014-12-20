@@ -1,4 +1,4 @@
-package io.fabric8.discovery.k8s;
+package io.fabric8.elasticsearch.discovery.k8s;
 
 import io.fabric8.kubernetes.api.Kubernetes;
 import io.fabric8.kubernetes.api.KubernetesFactory;
@@ -27,9 +27,6 @@ import java.util.Map;
 
 import static io.fabric8.kubernetes.api.KubernetesHelper.getDockerIp;
 
-/**
- *
- */
 public class K8sUnicastHostsProvider extends AbstractComponent implements UnicastHostsProvider {
 
     static final class Status {
@@ -143,7 +140,7 @@ public class K8sUnicastHostsProvider extends AbstractComponent implements Unicas
                                             // switch to the docker IP if its available
                                             if (address.equals("localhost") || address.equals("127.0.0.1")) {
                                                 String dockerIp = getDockerIp();
-                                                if (io.fabric8.common.util.Strings.isNotBlank(dockerIp)) {
+                                                if (io.fabric8.utils.Strings.isNotBlank(dockerIp)) {
                                                     address = dockerIp;
                                                 }
                                             }
