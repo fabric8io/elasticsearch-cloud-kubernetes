@@ -1,5 +1,7 @@
-Kubernetes Cloud Plugin for Elasticsearch
+Kubernetes Cloud Plugin for Elasticsearch:
 =========================================
+
+[![Build Status](https://travis-ci.org/fabric8io/elasticsearch-cloud-kubernetes.svg?branch=master)](https://travis-ci.org/fabric8io/elasticsearch-cloud-kubernetes)
 
 The Kubernetes Cloud plugin allows to use Kubernetes API for the unicast discovery mechanism.
 
