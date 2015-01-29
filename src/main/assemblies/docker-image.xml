@@ -13,7 +13,7 @@
 
   <dependencySets>
     <dependencySet>
-      <outputDirectory>/plugins/kubernetes</outputDirectory>
+      <outputDirectory>/plugins/cloud-kubernetes</outputDirectory>
       <useProjectAttachments>true</useProjectAttachments>
       <includes>
         <include>io.fabric8:elasticsearch-cloud-kubernetes:zip</include>
