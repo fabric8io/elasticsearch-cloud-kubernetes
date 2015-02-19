@@ -10,12 +10,11 @@ is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 KIND, either express or implied. See the License for the specific language
 governing permissions and limitations under the License. -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.fabric8</groupId>
   <artifactId>elasticsearch-cloud-kubernetes</artifactId>
-  <version>1.0.2-SNAPSHOT</version>
+  <version>1.0.2</version>
 
   <name>Elasticsearch Kubernetes cloud plugin</name>
   <description>The Kubernetes Cloud plugin allows to use Kubernetes for the unicast discovery mechanism.</description>
@@ -39,6 +38,7 @@ governing permissions and limitations under the License. -->
     <connection>scm:git:git@github.com:fabric8io/elasticsearch-cloud-kubernetes.git</connection>
     <developerConnection>scm:git:git@github.com:fabric8io/elasticsearch-cloud-kubernetes.git</developerConnection>
     <url>http://github.com/fabric8io/elasticsearch-cloud-kubernetes</url>
+    <tag>elasticsearch-cloud-kubernetes-1.0.2</tag>
   </scm>
 
   <issueManagement>
@@ -52,7 +52,7 @@ governing permissions and limitations under the License. -->
     <lucene.version>4.10.3</lucene.version>
     <tests.shuffle>true</tests.shuffle>
     <tests.output>onerror</tests.output>
-    <tests.client.ratio/>
+    <tests.client.ratio />
     <es.plugin.port>9300</es.plugin.port>
     <es.logger.level>INFO</es.logger.level>
     <es.config>${project.build.testOutputDirectory}/elasticsearch.yml</es.config>
@@ -177,19 +177,17 @@ governing permissions and limitations under the License. -->
               <jvmOutputAction>pipe,warn</jvmOutputAction>
               <leaveTemporary>true</leaveTemporary>
               <listeners>
-                <report-ant-xml mavenExtensions="true" dir="${project.build.directory}/surefire-reports"/>
-                <report-text showThrowable="true" showStackTraces="true" showOutput="${tests.output}"
-                             showStatusOk="false" showStatusError="true" showStatusFailure="true"
-                             showStatusIgnored="true" showSuiteSummary="true" timestamps="false"/>
-                <report-execution-times file="${basedir}/.local-execution-hints.log"/>
+                <report-ant-xml mavenExtensions="true" dir="${project.build.directory}/surefire-reports" />
+                <report-text showThrowable="true" showStackTraces="true" showOutput="${tests.output}" showStatusOk="false" showStatusError="true" showStatusFailure="true" showStatusIgnored="true" showSuiteSummary="true" timestamps="false" />
+                <report-execution-times file="${basedir}/.local-execution-hints.log" />
               </listeners>
               <assertions>
-                <enable/>
+                <enable />
               </assertions>
               <parallelism>1</parallelism>
               <balancers>
                 <execution-times>
-                  <fileset dir="${basedir}" includes=".local-execution-hints.log"/>
+                  <fileset dir="${basedir}" includes=".local-execution-hints.log" />
                 </execution-times>
               </balancers>
               <includes>
