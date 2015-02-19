@@ -46,9 +46,9 @@ governing permissions and limitations under the License. -->
     </issueManagement>
 
     <properties>
-        <elasticsearch.version>1.4.2</elasticsearch.version>
-        <fabric8.version>2.0.17</fabric8.version>
-        <lucene.version>4.10.2</lucene.version>
+        <elasticsearch.version>1.4.4</elasticsearch.version>
+        <fabric8.version>2.0.29</fabric8.version>
+        <lucene.version>4.10.3</lucene.version>
         <tests.shuffle>true</tests.shuffle>
         <tests.output>onerror</tests.output>
         <tests.client.ratio />
@@ -97,6 +97,7 @@ governing permissions and limitations under the License. -->
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-log4j12</artifactId>
           <version>1.7.5</version>
+          <scope>provided</scope>
         </dependency>
 
         <!-- Tests -->
@@ -282,15 +283,17 @@ governing permissions and limitations under the License. -->
             <plugin>
                 <groupId>org.jolokia</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
-                <version>0.10.5</version>
+                <version>0.11.1</version>
                 <configuration>
                     <images>
                         <image>
                             <name>fabric8/elasticsearch-k8s</name>
                             <build>
                                 <from>dockerfile/elasticsearch:latest</from>
-                                <assemblyDescriptor>${basedir}/src/main/assemblies/docker-image.xml</assemblyDescriptor>
-                                <exportDir>/data/</exportDir>
+                                <assembly>
+                                  <descriptor>${basedir}/src/main/assemblies/docker-image.xml</descriptor>
+                                  <basedir>/data/</basedir>
+                                </assembly>
                             </build>
                         </image>
                     </images>

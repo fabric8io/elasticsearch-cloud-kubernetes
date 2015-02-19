@@ -3,8 +3,8 @@ package io.fabric8.elasticsearch.discovery.k8s;
 import io.fabric8.kubernetes.api.Kubernetes;
 import io.fabric8.kubernetes.api.KubernetesFactory;
 import io.fabric8.kubernetes.api.KubernetesHelper;
-import io.fabric8.kubernetes.api.model.ManifestContainer;
-import io.fabric8.kubernetes.api.model.PodSchema;
+import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Port;
 import org.elasticsearch.Version;
 import org.elasticsearch.cluster.node.DiscoveryNode;
@@ -24,8 +24,6 @@ import java.net.InetAddress;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
-import static io.fabric8.kubernetes.api.KubernetesHelper.getDockerIp;
 
 public class K8sUnicastHostsProvider extends AbstractComponent implements UnicastHostsProvider {
 
@@ -98,15 +96,15 @@ public class K8sUnicastHostsProvider extends AbstractComponent implements Unicas
         }
 
         try {
-            Map<String, PodSchema> podMap = KubernetesHelper.getPodMap(kubernetes, selector);
-            Collection<PodSchema> pods = podMap.values();
+            Map<String, Pod> podMap = KubernetesHelper.getSelectedPodMap(kubernetes, selector);
+            Collection<Pod> pods = podMap.values();
 
             if (pods == null) {
                 logger.trace("no pod found for selector [{}].", this.selector);
                 return cachedDiscoNodes;
             }
 
-            for (PodSchema pod : pods) {
+            for (Pod pod : pods) {
                 String status = pod.getCurrentState().getStatus();
                 logger.trace("k8s instance {} with status {} found.", pod.getId(), status);
 
@@ -123,8 +121,8 @@ public class K8sUnicastHostsProvider extends AbstractComponent implements Unicas
                         // We can ignore it in the list of DiscoveryNode
                         logger.trace("current node found. Ignoring {} - {}", pod.getId(), podIp);
                     } else {
-                        List<ManifestContainer> containers = KubernetesHelper.getContainers(pod);
-                        for (ManifestContainer container : containers) {
+                        List<Container> containers = KubernetesHelper.getContainers(pod);
+                        for (Container container : containers) {
                             logger.trace("pod " + pod.getId() + " container: " + container.getName() + " image: " + container.getImage());
                             List<Port> ports = container.getPorts();
                             for (Port port : ports) {
