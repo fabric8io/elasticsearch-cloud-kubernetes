@@ -290,10 +290,10 @@ governing permissions and limitations under the License. -->
             <image>
               <name>fabric8/elasticsearch-k8s:${elasticsearch.version}</name>
               <build>
-                <from>dockerfile/elasticsearch:latest</from>
+                <from>elasticsearch:1.4.4</from>
                 <assembly>
                   <descriptor>${basedir}/src/main/assemblies/docker-image.xml</descriptor>
-                  <basedir>/data/</basedir>
+                  <basedir>/usr/share/elasticsearch/</basedir>
                 </assembly>
               </build>
             </image>

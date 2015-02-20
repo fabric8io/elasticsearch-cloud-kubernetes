@@ -5,6 +5,7 @@
 
   <fileSets>
     <fileSet>
+      <outputDirectory>/config/</outputDirectory>
       <includes>
         <include>elasticsearch.yml</include>
       </includes>

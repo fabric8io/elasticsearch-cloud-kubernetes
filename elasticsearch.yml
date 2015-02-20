@@ -5,7 +5,4 @@ discovery:
   type: io.fabric8.elasticsearch.discovery.k8s.K8sDiscoveryModule
 
 path:
-  data: /data/data
-  logs: /data/log
-  plugins: /data/plugins
-  work: /data/work
+  plugins: /usr/share/elasticsearch/plugins

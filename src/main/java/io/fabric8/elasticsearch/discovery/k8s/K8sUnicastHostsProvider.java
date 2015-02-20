@@ -146,7 +146,7 @@ public class K8sUnicastHostsProvider extends AbstractComponent implements Unicas
 
             }
         } catch (Throwable e) {
-            logger.warn("Exception caught during discovery {} : {}", e.getClass().getName(), e.getMessage());
+            logger.warn("Exception caught during discovery {} : {}", e, e.getClass().getName(), e.getMessage());
             logger.trace("Exception caught during discovery", e);
         }
 
