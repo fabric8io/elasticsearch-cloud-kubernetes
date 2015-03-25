@@ -3,6 +3,7 @@ package io.fabric8.elasticsearch.discovery.k8s;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.ClusterService;
 import org.elasticsearch.cluster.node.DiscoveryNodeService;
+import org.elasticsearch.cluster.settings.DynamicSettings;
 import org.elasticsearch.common.collect.ImmutableList;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.network.NetworkService;
@@ -27,9 +28,9 @@ public class K8sDiscovery extends ZenDiscovery {
                       ClusterService clusterService, NodeSettingsService nodeSettingsService, ZenPingService pingService,
                       DiscoveryNodeService discoveryNodeService,
                       NetworkService networkService, DiscoverySettings discoverySettings,
-                      ElectMasterService electMasterService) {
+                      ElectMasterService electMasterService, DynamicSettings dynamicSettings) {
     super(settings, clusterName, threadPool, transportService, clusterService, nodeSettingsService,
-        discoveryNodeService, pingService, electMasterService, discoverySettings);
+        discoveryNodeService, pingService, electMasterService, discoverySettings, dynamicSettings);
     if (settings.getAsBoolean("cloud.enabled", true)) {
       ImmutableList<? extends ZenPing> zenPings = pingService.zenPings();
       UnicastZenPing unicastZenPing = null;
