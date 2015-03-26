@@ -284,13 +284,13 @@ governing permissions and limitations under the License. -->
       <plugin>
         <groupId>org.jolokia</groupId>
         <artifactId>docker-maven-plugin</artifactId>
-        <version>0.11.1</version>
+        <version>0.11.2</version>
         <configuration>
           <images>
             <image>
               <name>index.docker.io/fabric8/elasticsearch-k8s:${elasticsearch.version}</name>
               <build>
-                <from>elasticsearch:1.4.4</from>
+                <from>elasticsearch:1.5.0</from>
                 <assembly>
                   <descriptor>${basedir}/src/main/assemblies/docker-image.xml</descriptor>
                   <basedir>/usr/share/elasticsearch/</basedir>
