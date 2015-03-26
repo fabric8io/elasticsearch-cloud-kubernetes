@@ -5,12 +5,13 @@ Kubernetes Cloud Plugin for Elasticsearch:
 
 The Kubernetes Cloud plugin allows to use Kubernetes API for the unicast discovery mechanism.
 
-## Version 1.0.3 for Elasticsearch: 1.4.4
+## Version 1.0.x for Elasticsearch: 1.4
+## Version 1.1.x for Elasticsearch: 1.5
 
 Installation
 ============
 ```
-plugin install io.fabric8/elasticsearch-cloud-kubernetes/1.0.3
+plugin install io.fabric8/elasticsearch-cloud-kubernetes/1.1.0
 ```
 
 Kubernetes Pod Discovery
