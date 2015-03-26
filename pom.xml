@@ -47,9 +47,9 @@ governing permissions and limitations under the License. -->
   </issueManagement>
 
   <properties>
-    <elasticsearch.version>1.4.4</elasticsearch.version>
-    <fabric8.version>2.0.29</fabric8.version>
-    <lucene.version>4.10.3</lucene.version>
+    <elasticsearch.version>1.5.0</elasticsearch.version>
+    <fabric8.version>2.0.34</fabric8.version>
+    <lucene.version>4.10.4</lucene.version>
     <tests.shuffle>true</tests.shuffle>
     <tests.output>onerror</tests.output>
     <tests.client.ratio />
