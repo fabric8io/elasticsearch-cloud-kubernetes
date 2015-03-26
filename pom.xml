@@ -288,7 +288,7 @@ governing permissions and limitations under the License. -->
         <configuration>
           <images>
             <image>
-              <name>index.docker.io/fabric8/elasticsearch-k8s:${elasticsearch.version}</name>
+              <name>registry.hub.docker.com/fabric8/elasticsearch-k8s:${elasticsearch.version}</name>
               <build>
                 <from>elasticsearch:1.5.0</from>
                 <assembly>
