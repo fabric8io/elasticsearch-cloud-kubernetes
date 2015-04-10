@@ -47,8 +47,8 @@ governing permissions and limitations under the License. -->
   </issueManagement>
 
   <properties>
-    <elasticsearch.version>1.5.1</elasticsearch.version>
-    <fabric8.version>2.0.34</fabric8.version>
+    <elasticsearch.version>1.5.0</elasticsearch.version>
+    <fabric8.version>2.0.41</fabric8.version>
     <lucene.version>4.10.4</lucene.version>
     <tests.shuffle>true</tests.shuffle>
     <tests.output>onerror</tests.output>
@@ -97,8 +97,7 @@ governing permissions and limitations under the License. -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <version>1.7.5</version>
-      <scope>provided</scope>
+      <version>1.7.7</version>
     </dependency>
 
     <!-- Tests -->
@@ -295,6 +294,10 @@ governing permissions and limitations under the License. -->
                   <descriptor>${basedir}/src/main/assemblies/docker-image.xml</descriptor>
                   <basedir>/usr/share/elasticsearch/</basedir>
                 </assembly>
+                <env>
+                  <NODE_DATA>true</NODE_DATA>
+                  <NODE_MASTER>true</NODE_MASTER>
+                </env>
               </build>
             </image>
           </images>
