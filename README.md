@@ -45,6 +45,19 @@ Depending on which once you choose, you can then either:
 
 In this example, we're going to use `servicedns` to look up the Elasticsearch cluster nodes to join.
 
+The following manifest uses 3 replication controllers to created Elasticsearch pods in 3 different modes:
+
+* master
+* data
+* client
+
+We use 2 services as well:
+
+* One to target the client pods so that all requests to the cluster go through the client nodes
+* A headless service to list all cluster endpoints managed by all 3 RCs.
+
+The DNS lookup is on the headless service name so that all existing nodes from the cluster are discovered on startup & the cluster is joined.
+
 ```json
 {
   "id": "elasticsearch-list",
