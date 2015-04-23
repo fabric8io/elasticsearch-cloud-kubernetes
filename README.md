@@ -11,7 +11,7 @@ The Kubernetes Cloud plugin allows to use Kubernetes API for the unicast discove
 Installation
 ============
 ```
-plugin install io.fabric8/elasticsearch-cloud-kubernetes/1.1.0
+plugin install io.fabric8/elasticsearch-cloud-kubernetes/1.1.1
 ```
 
 Kubernetes Pod Discovery
