@@ -6,10 +6,6 @@ import io.fabric8.kubernetes.api.KubernetesHelper;
 import io.fabric8.kubernetes.api.model.EndpointAddress;
 import io.fabric8.kubernetes.api.model.EndpointSubset;
 import io.fabric8.kubernetes.api.model.Endpoints;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.util.List;
-import java.util.Set;
 import org.elasticsearch.Version;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.Strings;
@@ -23,6 +19,11 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.discovery.zen.ping.unicast.UnicastHostsProvider;
 import org.elasticsearch.transport.TransportService;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.List;
+import java.util.Set;
+
 public class K8sUnicastHostsProvider extends AbstractComponent implements
         UnicastHostsProvider {
 
@@ -30,7 +31,8 @@ public class K8sUnicastHostsProvider extends AbstractComponent implements
 
         public static final String REFRESH = "refresh_interval";
         public static final String VERSION = "Elasticsearch/K8sCloud/1.0";
-        public static final String SELECTOR = "selector";
+        public static final String SERVICE = "service";
+        public static final String NAMESPACE = "namespace";
         public static final String SERVICE_DNS = "servicedns";
     }
 
@@ -39,8 +41,9 @@ public class K8sUnicastHostsProvider extends AbstractComponent implements
     private final TransportService transportService;
     private final NetworkService networkService;
 
-    private final String selector;
+    private final String serviceId;
     private final String serviceDns;
+    private final String namespace;
 
     private final TimeValue refreshInterval;
     private long lastRefresh;
@@ -57,12 +60,13 @@ public class K8sUnicastHostsProvider extends AbstractComponent implements
         this.refreshInterval = componentSettings.getAsTime(Fields.REFRESH,
                 settings.getAsTime("cloud.k8s." + Fields.REFRESH, TimeValue.timeValueSeconds(0)));
 
-        this.selector = componentSettings.get(Fields.SELECTOR, settings.get("cloud.k8s." + Fields.SELECTOR));
-        this.serviceDns = componentSettings.get(Fields.SELECTOR, settings.get("cloud.k8s." + Fields.SERVICE_DNS));
+        this.serviceId = componentSettings.get(Fields.SERVICE, settings.get("cloud.k8s." + Fields.SERVICE));
+        this.serviceDns = componentSettings.get(Fields.SERVICE, settings.get("cloud.k8s." + Fields.SERVICE_DNS));
+        this.namespace = componentSettings.get(Fields.SERVICE, settings.get("cloud.k8s." + Fields.NAMESPACE));
 
         // Check that we have all needed properties
-        if (!(Strings.hasText(this.selector) || Strings.hasText(this.serviceDns))) {
-            logger.warn("Neither cloud.k8s.{} or cloud.k8s.{} are set.", Fields.SELECTOR, Fields.SERVICE_DNS);
+        if (!((Strings.hasText(this.serviceId) && Strings.hasText(this.namespace)) || Strings.hasText(this.serviceDns))) {
+            logger.warn("Neither cloud.k8s.{} and cloud.k8s.{}, or cloud.k8s.{} are set.", Fields.SERVICE, Fields.NAMESPACE, Fields.SERVICE_DNS);
         }
     }
 
@@ -98,7 +102,7 @@ public class K8sUnicastHostsProvider extends AbstractComponent implements
         }
 
         try {
-            if (Strings.hasText(this.selector)) {
+            if (Strings.hasText(this.serviceId)) {
                 return getNodesFromKubernetesSelector(currentIpAddress);
             } else if (Strings.hasText(this.serviceDns)) {
                 return getNodesFromKubernetesServiceDns(currentIpAddress);
@@ -116,7 +120,7 @@ public class K8sUnicastHostsProvider extends AbstractComponent implements
 
     private List<DiscoveryNode> getNodesFromKubernetesSelector(String currentIpAddress) {
         // get all endpoints for service
-        final Endpoints endpoints = getKubernetes().endpointsForService(this.selector, null);
+        final Endpoints endpoints = getKubernetes().endpointsForService(this.serviceId, this.namespace);
 
         int podsCount = 0;
         // populate discovery nodes list
@@ -139,7 +143,7 @@ public class K8sUnicastHostsProvider extends AbstractComponent implements
                 }
             }
         }
-        logger.trace("Found {} for selector [{}].", podsCount, this.selector);
+        logger.trace("Found {} for serviceId [{}].", podsCount, this.serviceId);
 
         return cachedDiscoNodes;
     }

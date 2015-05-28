@@ -34,11 +34,17 @@ path:
   work: /data/work
 ```
 
-If you want to use a Kubernetes pod selector instead, then use `selector: ${SELECTOR}` instead of the `serviceDns` setting.
+If you want to use Kubernetes service endpoints instead (remember this will require auth to the
+Kubernetes API server if you do this), then use:
+
+```
+service: ${SERVICE}
+namespace: ${NAMESPACE}
+```
 
 Depending on which once you choose, you can then either:
 
-* Set the `SELECTOR` environment variable to specify the selector for your Elasticsearch pods, e.g. `cluster=myCluster,component=elasticsearch`.
+* Set the `SERVICE` & `NAMESPACE` environment variables to specify the service to discover endpoints for, e.g. `elasticsearch-cluster`.
 * Set the `SERVICE_DNS` environment variable to specify the service name to look up endpoints for in DNS, e.g. `elasticsearch-cluster`.
 
 # Kubernetes example
