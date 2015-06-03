@@ -325,11 +325,31 @@ governing permissions and limitations under the License. -->
               <execution>
                 <goals>
                   <goal>build</goal>
-                  <goal>push</goal>
                 </goals>
                 <phase>package</phase>
               </execution>
             </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>1.4.0</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <phase>package</phase>
+              </execution>
+            </executions>
+            <configuration>
+              <executable>docker</executable>
+              <arguments>
+                <argument>push</argument>
+                <argument>fabric8/elasticsearch-k8s:${elasticsearch.version}</argument>
+                <argument>-f</argument>
+              </arguments>
+            </configuration>
           </plugin>
         </plugins>
       </build>
