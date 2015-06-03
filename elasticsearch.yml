@@ -3,8 +3,7 @@ node.master: ${NODE_MASTER}
 
 cloud:
   k8s:
-    namespace: default
-    service: elasticsearch
+    servicedns: ${SERVICE_DNS}
 
 discovery:
   type: io.fabric8.elasticsearch.discovery.k8s.K8sDiscoveryModule
