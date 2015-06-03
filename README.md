@@ -47,6 +47,39 @@ Depending on which once you choose, you can then either:
 * Set the `SERVICE` & `NAMESPACE` environment variables to specify the service to discover endpoints for, e.g. `elasticsearch-cluster`.
 * Set the `SERVICE_DNS` environment variable to specify the service name to look up endpoints for in DNS, e.g. `elasticsearch-cluster`.
 
+## Kubernetes auth
+
+The preferred way to authenticate to Kubernetes is to use [service accounts](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/design/service_accounts.md).
+This is fully supported by this Elasticsearch Kubernetes plugin as it uses the [Fabric8](http://fabric8.io) Kubernetes API.
+
+As an example, to create a service account do something like:
+
+```
+cat <<EOF | kubectl create -f -
+apiVersion: v1beta3
+kind: ServiceAccount
+metadata:
+  name: elasticsearch
+EOF
+```
+
+This creates a service account called `elasticsearch`. To use this service account, you need to add the service account
+to your pod spec or your replication controller pod template spec like this:
+
+```
+apiVersion: v1beta3
+kind: Pod 
+metadata:
+  name: elasticsearch
+  <SNIP>
+spec:
+  serviceAccount: elasticsearch
+  <SNIP>
+```
+
+This will mount the service account token at `/var/run/secrets/kubernetes.io/servicaccount/token` & will be automatically
+read by the fabric8 kubernetes client when the request is made to the API server.
+
 # Kubernetes example
 
 In this example, we're going to use `servicedns` to look up the Elasticsearch cluster nodes to join.
