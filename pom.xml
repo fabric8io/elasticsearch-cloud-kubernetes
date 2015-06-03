@@ -346,8 +346,8 @@ governing permissions and limitations under the License. -->
               <executable>docker</executable>
               <arguments>
                 <argument>push</argument>
-                <argument>fabric8/elasticsearch-k8s:${elasticsearch.version}</argument>
                 <argument>-f</argument>
+                <argument>fabric8/elasticsearch-k8s:${elasticsearch.version}</argument>
               </arguments>
             </configuration>
           </plugin>
