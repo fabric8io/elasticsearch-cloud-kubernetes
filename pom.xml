@@ -287,7 +287,7 @@ governing permissions and limitations under the License. -->
         <configuration>
           <images>
             <image>
-              <name>fabric8/elasticsearch-k8s:${elasticsearch.version}</name>
+              <name>docker.io/fabric8/elasticsearch-k8s:${elasticsearch.version}</name>
               <build>
                 <from>elasticsearch:${elasticsearch.version}</from>
                 <assembly>
@@ -347,7 +347,7 @@ governing permissions and limitations under the License. -->
               <arguments>
                 <argument>push</argument>
                 <argument>-f</argument>
-                <argument>fabric8/elasticsearch-k8s:${elasticsearch.version}</argument>
+                <argument>docker.io/fabric8/elasticsearch-k8s:${elasticsearch.version}</argument>
               </arguments>
             </configuration>
           </plugin>
