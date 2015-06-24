@@ -127,7 +127,7 @@ public class K8sUnicastHostsProvider extends AbstractComponent implements
         for (EndpointSubset es : endpoints.getSubsets()) {
             for (EndpointAddress address : es.getAddresses()) {
                 podsCount++;
-                final String endpointIp = address.getIP();
+                final String endpointIp = address.getIp();
                 if (endpointIp.equals(currentIpAddress)) {
                     logger.trace("Current node found. Ignoring {}", endpointIp);
                 } else {
