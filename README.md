@@ -7,6 +7,7 @@ The Kubernetes Cloud plugin allows to use Kubernetes API for the unicast discove
 
 ## Version 1.0.x for Elasticsearch: 1.4
 ## Version 1.1.x/1.2.x for Elasticsearch: 1.5
+## Version 1.3.x for Elasticsearch: 1.6
 
 Installation
 ============
@@ -68,7 +69,7 @@ to your pod spec or your replication controller pod template spec like this:
 
 ```
 apiVersion: v1beta3
-kind: Pod 
+kind: Pod
 metadata:
   name: elasticsearch
   <SNIP>
@@ -79,6 +80,11 @@ spec:
 
 This will mount the service account token at `/var/run/secrets/kubernetes.io/servicaccount/token` & will be automatically
 read by the fabric8 kubernetes client when the request is made to the API server.
+
+There are also a number of different environment variables that you may find useful:
+
+. `KUBERNETES_TRUST_CERT=false`: disable certificate validation. Set to true to trust the Kubernetes API server certificate.
+. `KUBECONFIG`: path to a standard Kubernetes config file to use for authentication configuration.
 
 # Kubernetes example
 
