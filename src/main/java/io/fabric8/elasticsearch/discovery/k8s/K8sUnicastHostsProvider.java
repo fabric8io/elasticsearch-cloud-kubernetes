@@ -1,11 +1,10 @@
 package io.fabric8.elasticsearch.discovery.k8s;
 
-import io.fabric8.kubernetes.api.Kubernetes;
-import io.fabric8.kubernetes.api.KubernetesFactory;
-import io.fabric8.kubernetes.api.KubernetesHelper;
 import io.fabric8.kubernetes.api.model.EndpointAddress;
 import io.fabric8.kubernetes.api.model.EndpointSubset;
 import io.fabric8.kubernetes.api.model.Endpoints;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import org.elasticsearch.Version;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.Strings;
@@ -18,9 +17,16 @@ import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.discovery.zen.ping.unicast.UnicastHostsProvider;
 import org.elasticsearch.transport.TransportService;
+import org.xbill.DNS.ARecord;
+import org.xbill.DNS.Lookup;
+import org.xbill.DNS.Record;
+import org.xbill.DNS.TextParseException;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -36,7 +42,7 @@ public class K8sUnicastHostsProvider extends AbstractComponent implements
         public static final String SERVICE_DNS = "servicedns";
     }
 
-    private Kubernetes kubernetes;
+    private KubernetesClient kubernetesClient;
 
     private final TransportService transportService;
     private final NetworkService networkService;
@@ -120,7 +126,7 @@ public class K8sUnicastHostsProvider extends AbstractComponent implements
 
     private List<DiscoveryNode> getNodesFromKubernetesSelector(String currentIpAddress) {
         // get all endpoints for service
-        final Endpoints endpoints = getKubernetes().endpointsForService(this.serviceId, this.namespace);
+        final Endpoints endpoints = getKubernetesClient().endpoints().inNamespace(this.namespace).withName(this.serviceId).get();
 
         int podsCount = 0;
         // populate discovery nodes list
@@ -149,7 +155,7 @@ public class K8sUnicastHostsProvider extends AbstractComponent implements
     }
 
     private List<DiscoveryNode> getNodesFromKubernetesServiceDns(String currentIpAddress) throws Exception {
-        Set<String> serviceEndpointIps = KubernetesHelper.lookupServiceInDns(serviceDns);
+        Set<String> serviceEndpointIps = lookupServiceInDns(serviceDns);
 
         if (serviceEndpointIps == null) {
             logger.trace("no service endpoints found for service name [{}].", this.serviceDns);
@@ -176,10 +182,39 @@ public class K8sUnicastHostsProvider extends AbstractComponent implements
         return cachedDiscoNodes;
     }
 
-    private Kubernetes getKubernetes() {
-        if (kubernetes == null) {
-            kubernetes = new KubernetesFactory().createKubernetes();
+    /**
+     * Looks up the service in DNS.
+     * If this is a headless service, this call returns the endpoint IPs from DNS.
+     * If this is a non-headless service, this call returns the service IP only.
+     * <p/>
+     * See https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/services.md#headless-services
+     */
+    private Set<String> lookupServiceInDns(String serviceName) throws IllegalArgumentException, UnknownHostException {
+        try {
+            Lookup l = new Lookup(serviceName);
+            Record[] records = l.run();
+            if (l.getResult() == Lookup.SUCCESSFUL) {
+                Set<String> endpointAddresses = new HashSet<>(records.length);
+                for (int i = 0; i < records.length; i++) {
+                    ARecord aRecord = (ARecord) records[i];
+                    endpointAddresses.add(aRecord.getAddress().getHostAddress());
+                }
+                return endpointAddresses;
+            } else {
+                logger.warn("Lookup {} result: {}", serviceName, l.getErrorString());
+            }
+        } catch (TextParseException e) {
+            logger.error("Unparseable service name: {}", serviceName, e);
+        } catch (ClassCastException e) {
+            logger.error("Invalid response from DNS server - should have been A records", e);
         }
-        return kubernetes;
+        return Collections.EMPTY_SET;
+    }
+
+    private KubernetesClient getKubernetesClient() {
+        if (kubernetesClient == null) {
+            kubernetesClient = new DefaultKubernetesClient();
+        }
+        return kubernetesClient;
     }
 }
