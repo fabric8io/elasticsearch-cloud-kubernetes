@@ -16,12 +16,11 @@
     limitations under the License.
 
 -->
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.fabric8</groupId>
   <artifactId>elasticsearch-cloud-kubernetes</artifactId>
-  <version>2.0.0-SNAPSHOT</version>
+  <version>2.0.0</version>
 
   <name>Elasticsearch Kubernetes cloud plugin</name>
   <description>The Kubernetes Cloud plugin allows to use Kubernetes for the unicast discovery mechanism.</description>
@@ -45,7 +44,7 @@
     <connection>scm:git:git@github.com:fabric8io/elasticsearch-cloud-kubernetes.git</connection>
     <developerConnection>scm:git:git@github.com:fabric8io/elasticsearch-cloud-kubernetes.git</developerConnection>
     <url>http://github.com/fabric8io/elasticsearch-cloud-kubernetes</url>
-    <tag>HEAD</tag>
+    <tag>elasticsearch-cloud-kubernetes-2.0.0</tag>
   </scm>
 
   <issueManagement>
@@ -60,7 +59,7 @@
     <lucene.version>4.10.4</lucene.version>
     <tests.shuffle>true</tests.shuffle>
     <tests.output>onerror</tests.output>
-    <tests.client.ratio/>
+    <tests.client.ratio />
     <es.plugin.port>9300</es.plugin.port>
     <es.logger.level>INFO</es.logger.level>
     <es.config>${project.build.testOutputDirectory}/elasticsearch.yml</es.config>
