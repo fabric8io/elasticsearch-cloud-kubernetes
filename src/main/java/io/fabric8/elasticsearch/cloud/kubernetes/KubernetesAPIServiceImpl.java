@@ -6,14 +6,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.common.component.AbstractLifecycleComponent;
 import org.elasticsearch.common.inject.Inject;
-import org.elasticsearch.common.network.NetworkService;
 import org.elasticsearch.common.settings.Settings;
-
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 public class KubernetesAPIServiceImpl extends AbstractLifecycleComponent<KubernetesAPIService>
   implements KubernetesAPIService {
@@ -22,34 +15,15 @@ public class KubernetesAPIServiceImpl extends AbstractLifecycleComponent<Kuberne
   private final String serviceName;
 
   @Override
-  public Collection<InetAddress> endpoints() {
+  public Endpoints endpoints() {
     logger.debug("get endpoints for service {}, namespace {}", serviceName, namespace);
-    final Set<InetAddress> instances = new HashSet<>();
-    Endpoints endpoints = client().endpoints().inNamespace(namespace).withName(serviceName).get();
-    if (endpoints != null && endpoints.getSubsets() != null) {
-      endpoints.getSubsets().stream().forEach((endpointSubset) -> {
-        endpointSubset.getAddresses().stream().forEach((endpointAddress -> {
-          String ip = endpointAddress.getIp();
-          try {
-            instances.add(InetAddress.getByName(ip));
-          } catch (UnknownHostException e) {
-            logger.warn("Ignoring invalid endpoint IP address: {}", ip);
-          }
-        }));
-      });
-    }
-
-    if (instances.isEmpty()) {
-      logger.warn("disabling Kubernetes discovery. Can not get list of endpoints");
-    }
-
-    return instances;
+    return client().endpoints().inNamespace(namespace).withName(serviceName).get();
   }
 
   private KubernetesClient client;
 
   @Inject
-  public KubernetesAPIServiceImpl(Settings settings, NetworkService networkService) {
+  public KubernetesAPIServiceImpl(Settings settings) {
     super(settings);
     this.namespace = settings.get(Fields.NAMESPACE);
     this.serviceName = settings.get(Fields.SERVICE_NAME);

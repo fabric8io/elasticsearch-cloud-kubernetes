@@ -1,9 +1,7 @@
 package io.fabric8.elasticsearch.cloud.kubernetes;
 
+import io.fabric8.kubernetes.api.model.Endpoints;
 import org.elasticsearch.common.component.LifecycleComponent;
-
-import java.net.InetAddress;
-import java.util.Collection;
 
 public interface KubernetesAPIService extends LifecycleComponent<KubernetesAPIService> {
 
@@ -12,7 +10,7 @@ public interface KubernetesAPIService extends LifecycleComponent<KubernetesAPISe
    *
    * @return a collection of IP addresses for the service endpoints
    */
-  Collection<InetAddress> endpoints();
+  Endpoints endpoints();
 
   final class Fields {
     public static final String NAMESPACE = "cloud.kubernetes.namespace";

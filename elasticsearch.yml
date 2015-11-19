@@ -17,9 +17,12 @@
 node.data: ${NODE_DATA}
 node.master: ${NODE_MASTER}
 
+security.manager.enabled: false
+network.host: _non_loopback:ipv4_
+
 cloud:
   kubernetes:
-    service: ${SERVICE_DNS}
+    service: ${SERVICE}
     namespace: ${KUBERNETES_NAMESPACE}
 
 discovery:

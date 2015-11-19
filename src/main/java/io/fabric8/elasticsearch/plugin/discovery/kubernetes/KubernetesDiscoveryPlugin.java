@@ -62,7 +62,7 @@ public class KubernetesDiscoveryPlugin extends Plugin {
 
   @Override
   public String name() {
-    return "discovery-kubernetes";
+    return "cloud-kubernetes";
   }
 
   @Override

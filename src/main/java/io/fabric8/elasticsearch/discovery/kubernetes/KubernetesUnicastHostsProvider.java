@@ -1,6 +1,7 @@
 package io.fabric8.elasticsearch.discovery.kubernetes;
 
 import io.fabric8.elasticsearch.cloud.kubernetes.KubernetesAPIService;
+import io.fabric8.kubernetes.api.model.Endpoints;
 import org.elasticsearch.Version;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.component.AbstractComponent;
@@ -15,8 +16,8 @@ import org.elasticsearch.transport.TransportService;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class KubernetesUnicastHostsProvider extends AbstractComponent implements UnicastHostsProvider {
@@ -30,6 +31,7 @@ public class KubernetesUnicastHostsProvider extends AbstractComponent implements
   private NetworkService networkService;
   private long lastRefresh;
   private List<DiscoveryNode> cachedDiscoNodes;
+
   @Inject
   public KubernetesUnicastHostsProvider(Settings settings,
                                         KubernetesAPIService kubernetesAPIService,
@@ -66,47 +68,58 @@ public class KubernetesUnicastHostsProvider extends AbstractComponent implements
     logger.debug("start building nodes list using Kubernetes API");
 
     cachedDiscoNodes = new ArrayList<>();
-    String ipAddress = null;
+    String tmpIPAddress = null;
     try {
       InetAddress inetAddress = networkService.resolvePublishHostAddress(null);
       if (inetAddress != null) {
-        ipAddress = NetworkAddress.formatAddress(inetAddress);
+        tmpIPAddress = NetworkAddress.formatAddress(inetAddress);
       }
     } catch (IOException e) {
       // We can't find the publish host address... Hmmm. Too bad :-(
       // We won't simply filter it
     }
+    final String ipAddress = tmpIPAddress;
 
     try {
-      Collection<InetAddress> endpoints = kubernetesAPIService.endpoints();
-
-      if (endpoints == null) {
-        logger.trace("no endpoints found for service [{}], namespace [{}].", this.serviceName, this.namespace);
+      Endpoints endpoints = kubernetesAPIService.endpoints();
+      if (endpoints == null || endpoints.getSubsets() == null || endpoints.getSubsets().isEmpty()) {
+        logger.warn("no endpoints found for service [{}], namespace [{}].", this.serviceName, this.namespace);
         return cachedDiscoNodes;
       }
+      endpoints.getSubsets().stream().forEach((endpointSubset) -> {
+        endpointSubset.getAddresses().stream().forEach((address -> {
+          String ip = address.getIp();
+          try {
+            InetAddress endpointAddress = InetAddress.getByName(ip);
+            String formattedEndpointAddress = NetworkAddress.formatAddress(endpointAddress);
+            try {
+              if (formattedEndpointAddress.equals(ipAddress)) {
+                // We found the current node.
+                // We can ignore it in the list of DiscoveryNode
+                logger.trace("current node found. Ignoring {}", ipAddress);
+              } else {
 
-      for (InetAddress endpoint : endpoints) {
-        String endpointAddress = NetworkAddress.formatAddress(endpoint);
-        try {
-          if (endpointAddress.equals(ipAddress)) {
-            // We found the current node.
-            // We can ignore it in the list of DiscoveryNode
-            logger.trace("current node found. Ignoring {}", ipAddress);
-          } else {
-            // endpoint address is a single IP Address. We need to build a TransportAddress from it
-            endpointAddress = endpointAddress.concat(":9200");
-            TransportAddress[] addresses = transportService.addressesFromString(endpointAddress, 1);
+                endpointSubset.getPorts().stream().forEach((port) -> {
+                  try {
+                    TransportAddress[] addresses = transportService.addressesFromString(formattedEndpointAddress + ":" + port.getPort(), 1);
 
-            for (TransportAddress transportAddress : addresses) {
-              logger.trace("adding endpoint {}, transport_address {}", endpointAddress, transportAddress);
-              cachedDiscoNodes.add(new DiscoveryNode("#cloud-" + endpointAddress + "-" + 0, transportAddress, version.minimumCompatibilityVersion()));
+                    for (TransportAddress transportAddress : addresses) {
+                      logger.info("adding endpoint {}, transport_address {}", endpointAddress, transportAddress);
+                      cachedDiscoNodes.add(new DiscoveryNode("#cloud-" + endpointAddress + "-" + 0, transportAddress, version.minimumCompatibilityVersion()));
+                    }
+                  } catch (Exception e) {
+                    logger.warn("failed to add endpoint {}", e, endpointAddress);
+                  }
+                });
+              }
+            } catch (Exception e) {
+              logger.warn("failed to add endpoint {}", e, endpointAddress);
             }
+          } catch (UnknownHostException e) {
+            logger.warn("Ignoring invalid endpoint IP address: {}", e, ip);
           }
-        } catch (Exception e) {
-          logger.warn("failed to add endpoint {}", endpointAddress);
-        }
-
-      }
+        }));
+      });
     } catch (Throwable e) {
       logger.warn("Exception caught during discovery: {}", e, e.getMessage());
     }
