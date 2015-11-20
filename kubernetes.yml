@@ -21,6 +21,9 @@ items:
   kind: "Service"
   metadata:
     name: "elasticsearch"
+    labels:
+      component: "elasticsearch"
+      provider: "fabric8"
   spec:
     ports:
       - port: 9200
@@ -34,6 +37,9 @@ items:
   kind: "Service"
   metadata:
     name: "elasticsearch-cluster"
+    labels:
+      component: "elasticsearch"
+      provider: "fabric8"
   spec:
     clusterIP: "None"
     ports:
@@ -46,6 +52,10 @@ items:
   kind: "ReplicationController"
   metadata:
     name: "elasticsearch-data"
+    labels:
+      component: "elasticsearch"
+      type: "data"
+      provider: "fabric8"
   spec:
     replicas: 1
     selector:
@@ -88,6 +98,10 @@ items:
   kind: "ReplicationController"
   metadata:
     name: "elasticsearch-master"
+    labels:
+      component: "elasticsearch"
+      type: "master"
+      provider: "fabric8"
   spec:
     replicas: 1
     selector:
@@ -122,6 +136,10 @@ items:
   kind: "ReplicationController"
   metadata:
     name: "elasticsearch-client"
+    labels:
+      component: "elasticsearch"
+      type: "master"
+      provider: "fabric8"
   spec:
     replicas: 1
     selector:
