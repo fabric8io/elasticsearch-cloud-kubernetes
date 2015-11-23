@@ -27,7 +27,7 @@ items:
   spec:
     ports:
       - port: 9200
-        targetPort: "http"
+        targetPort: 9200
     selector:
       component: "elasticsearch"
       type: "client"
@@ -36,9 +36,10 @@ items:
 - apiVersion: "v1"
   kind: "Service"
   metadata:
-    name: "elasticsearch-cluster"
+    name: "elasticsearch-masters"
     labels:
       component: "elasticsearch"
+      type: "master"
       provider: "fabric8"
   spec:
     clusterIP: "None"
@@ -47,6 +48,7 @@ items:
         targetPort: 9300
     selector:
       provider: "fabric8"
+      type: "master"
       component: "elasticsearch"
 - apiVersion: "v1"
   kind: "ReplicationController"
@@ -74,7 +76,7 @@ items:
         containers:
           - env:
               - name: "SERVICE"
-                value: "elasticsearch-cluster"
+                value: "elasticsearch-masters"
               - name: "KUBERNETES_NAMESPACE"
                 valueFrom:
                   fieldRef:
@@ -120,7 +122,7 @@ items:
         containers:
           - env:
               - name: "SERVICE"
-                value: "elasticsearch-cluster"
+                value: "elasticsearch-masters"
               - name: "KUBERNETES_NAMESPACE"
                 valueFrom:
                   fieldRef:
@@ -158,7 +160,7 @@ items:
         containers:
           - env:
               - name: "SERVICE"
-                value: "elasticsearch-cluster"
+                value: "elasticsearch-masters"
               - name: "KUBERNETES_NAMESPACE"
                 valueFrom:
                   fieldRef:
