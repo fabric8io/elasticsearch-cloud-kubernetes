@@ -5,16 +5,19 @@ Kubernetes Cloud Plugin for Elasticsearch:
 
 The Kubernetes Cloud plugin allows to use Kubernetes API for the unicast discovery mechanism.
 
-## Version 1.0.x for Elasticsearch: 1.4
-## Version 1.1.x/1.2.x for Elasticsearch: 1.5
-## Version 1.3.x for Elasticsearch: 1.6
-## Version 2.0.x for Elasticsearch: 2.0
-
 Installation
 ============
 ```
-plugin install io.fabric8/elasticsearch-cloud-kubernetes/2.0.2
+plugin install io.fabric8/elasticsearch-cloud-kubernetes/2.1.0
 ```
+
+Versions available
+==================
+
+As of `2.0.0`, this plug-in follows Elasticsearch versioning.
+
+**Older versions**:
+* `1.3.x` for Elasticsearch `1.6` and `1.7`
 
 Kubernetes Pod Discovery
 ===============================
@@ -143,7 +146,7 @@ items:
                     fieldPath: "metadata.namespace"
               - name: "NODE_MASTER"
                 value: "false"
-            image: "fabric8/elasticsearch-k8s:2.0.0"
+            image: "fabric8/elasticsearch-k8s:2.1.0"
             name: "elasticsearch"
             ports:
               - containerPort: 9300
@@ -185,7 +188,7 @@ items:
                     fieldPath: "metadata.namespace"
               - name: "NODE_DATA"
                 value: "false"
-            image: "fabric8/elasticsearch-k8s:2.0.0"
+            image: "fabric8/elasticsearch-k8s:2.1.0"
             name: "elasticsearch"
             ports:
               - containerPort: 9300
@@ -221,7 +224,7 @@ items:
                 value: "false"
               - name: "NODE_MASTER"
                 value: "false"
-            image: "fabric8/elasticsearch-k8s:2.0.0"
+            image: "fabric8/elasticsearch-k8s:2.1.0"
             name: "elasticsearch"
             ports:
               - containerPort: 9200
