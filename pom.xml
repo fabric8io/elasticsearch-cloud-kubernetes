@@ -250,6 +250,7 @@
         <version>2.5</version>
         <configuration>
           <releaseProfiles>docker-deploy</releaseProfiles>
+          <goals>deploy docker:build docker:push</goals>
         </configuration>
       </plugin>
       <plugin>
