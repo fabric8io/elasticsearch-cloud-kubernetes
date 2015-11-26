@@ -238,6 +238,7 @@
                 <env>
                   <NODE_DATA>true</NODE_DATA>
                   <NODE_MASTER>true</NODE_MASTER>
+                  <JAVA_OPTS>-Djava.net.preferIPv4Stack=true</JAVA_OPTS>
                 </env>
               </build>
             </image>

@@ -18,7 +18,7 @@ node.data: ${NODE_DATA}
 node.master: ${NODE_MASTER}
 
 security.manager.enabled: false
-network.host: _non_loopback:ipv4_
+network.host: 0.0.0.0
 
 cloud:
   kubernetes:
