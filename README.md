@@ -8,14 +8,14 @@ The Kubernetes Cloud plugin allows to use Kubernetes API for the unicast discove
 Installation
 ============
 ```
-plugin install io.fabric8/elasticsearch-cloud-kubernetes/2.1.1
+plugin install io.fabric8/elasticsearch-cloud-kubernetes/2.2.0
 ```
 
 Versions available
 ==================
 
 As of `2.0.0`, each released version of this plugin is compatible with the equal version of Elasticsearch,
-e.g. `2.1.1` of this plugin is compatible with `2.1.1` of Elasticsearch.
+e.g. `2.2.0` of this plugin is compatible with `2.2.0` of Elasticsearch.
 
 **Older versions**:
 * `1.3.x` for Elasticsearch `1.6` and `1.7`

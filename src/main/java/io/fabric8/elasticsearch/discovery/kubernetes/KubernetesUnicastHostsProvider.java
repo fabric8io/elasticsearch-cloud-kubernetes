@@ -85,7 +85,7 @@ public class KubernetesUnicastHostsProvider extends AbstractComponent implements
     cachedDiscoNodes = new ArrayList<>();
     String tmpIPAddress = null;
     try {
-      InetAddress inetAddress = networkService.resolvePublishHostAddress(null);
+      InetAddress inetAddress = networkService.resolvePublishHostAddresses(null);
       if (inetAddress != null) {
         tmpIPAddress = NetworkAddress.formatAddress(inetAddress);
       }
