@@ -30,7 +30,7 @@ RUN set -x \
 
 # https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-repositories.html
 # https://packages.elasticsearch.org/GPG-KEY-elasticsearch
-RUN apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys 46095ACC8548582C1A2699A9D27D666CD88E42B4
+RUN apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-keys 46095ACC8548582C1A2699A9D27D666CD88E42B4
 
 ENV ELASTICSEARCH_MAJOR 2.2
 ENV ELASTICSEARCH_VERSION 2.2.1
