@@ -32,6 +32,8 @@ import org.elasticsearch.transport.TransportService;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,6 +74,17 @@ public class KubernetesUnicastHostsProvider extends AbstractComponent implements
    */
   @Override
   public List<DiscoveryNode> buildDynamicNodes() {
+    final List<DiscoveryNode> result = new ArrayList<>();
+    AccessController.
+      doPrivileged((PrivilegedAction) () -> {
+        result.addAll(readNodes());
+        return null;
+      });
+
+    return result;
+  }
+
+  private List<DiscoveryNode> readNodes() {
     if (refreshInterval.millis() != 0) {
       if (cachedDiscoNodes != null &&
         (refreshInterval.millis() < 0 || (System.currentTimeMillis() - lastRefresh) < refreshInterval.millis())) {
