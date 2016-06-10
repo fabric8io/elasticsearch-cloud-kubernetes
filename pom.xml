@@ -215,17 +215,15 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.jolokia</groupId>
+        <groupId>io.fabric8</groupId>
         <artifactId>docker-maven-plugin</artifactId>
-        <version>0.13.6</version>
+        <version>0.15.7</version>
         <configuration>
           <images>
             <image>
               <name>docker.io/fabric8/elasticsearch:${elasticsearch.version}</name>
               <build>
-                <assembly>
-                  <dockerFileDir>${project.basedir}/src/main/docker</dockerFileDir>
-                </assembly>
+                <dockerFileDir>${project.basedir}/src/main/docker</dockerFileDir>
               </build>
             </image>
             <image>
