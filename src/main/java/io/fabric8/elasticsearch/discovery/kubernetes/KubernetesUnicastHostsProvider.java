@@ -100,7 +100,7 @@ public class KubernetesUnicastHostsProvider extends AbstractComponent implements
     try {
       InetAddress inetAddress = networkService.resolvePublishHostAddresses(null);
       if (inetAddress != null) {
-        tmpIPAddress = NetworkAddress.formatAddress(inetAddress);
+        tmpIPAddress = NetworkAddress.format(inetAddress);
       }
     } catch (IOException e) {
       // We can't find the publish host address... Hmmm. Too bad :-(
@@ -119,7 +119,7 @@ public class KubernetesUnicastHostsProvider extends AbstractComponent implements
           String ip = address.getIp();
           try {
             InetAddress endpointAddress = InetAddress.getByName(ip);
-            String formattedEndpointAddress = NetworkAddress.formatAddress(endpointAddress);
+            String formattedEndpointAddress = NetworkAddress.format(endpointAddress);
             try {
               if (formattedEndpointAddress.equals(ipAddress)) {
                 // We found the current node.
