@@ -15,98 +15,119 @@
  */
 package io.fabric8.elasticsearch.plugin.discovery.kubernetes;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.*;
+
 import io.fabric8.elasticsearch.cloud.kubernetes.KubernetesAPIService;
+import io.fabric8.elasticsearch.cloud.kubernetes.KubernetesAPIServiceImpl;
 import io.fabric8.elasticsearch.cloud.kubernetes.KubernetesModule;
-import io.fabric8.elasticsearch.discovery.kubernetes.KubernetesDiscovery;
 import io.fabric8.elasticsearch.discovery.kubernetes.KubernetesUnicastHostsProvider;
+
+import org.apache.logging.log4j.Logger;
+import org.apache.lucene.util.IOUtils;
+import org.apache.lucene.util.SetOnce;
+import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.SpecialPermission;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.component.LifecycleComponent;
 import org.elasticsearch.common.inject.Module;
-import org.elasticsearch.common.logging.ESLogger;
 import org.elasticsearch.common.logging.Loggers;
+import org.elasticsearch.common.settings.Setting;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.discovery.DiscoveryModule;
+import org.elasticsearch.discovery.zen.ZenDiscovery;
+import org.elasticsearch.plugins.DiscoveryPlugin;
 import org.elasticsearch.plugins.Plugin;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
-public class KubernetesDiscoveryPlugin extends Plugin {
-
-  protected final ESLogger logger = Loggers.getLogger(KubernetesDiscoveryPlugin.class);
+public class KubernetesDiscoveryPlugin extends Plugin implements DiscoveryPlugin, Closeable {
+  public static final String KUBERNETES = "kubernetes";
+  private static Logger logger = Loggers.getLogger(KubernetesDiscoveryPlugin.class);
   private final Settings settings;
+  private final SetOnce<KubernetesAPIServiceImpl> kubernetesAPIService = new SetOnce<>();
+
+  static {
+    SecurityManager sm = System.getSecurityManager();
+    if (sm != null) {
+      sm.checkPermission(new SpecialPermission());
+    }
+  }
+
 
   public KubernetesDiscoveryPlugin(Settings settings) {
     this.settings = settings;
+    logger.trace("Starting kubernetes discovery plugin...");
   }
 
-  /**
-   * Check if discovery is meant to start
-   *
-   * @return true if we can start kubernetes discovery features
-   */
-  public static boolean isDiscoveryAlive(Settings settings, ESLogger logger) {
-    // User set discovery.type: kubernetes
-    if (!KubernetesDiscovery.KUBERNETES.equalsIgnoreCase(settings.get("discovery.type"))) {
-      logger.debug("discovery.type not set to {}", KubernetesDiscovery.KUBERNETES);
-      return false;
+  public void onModule(DiscoveryModule discoveryModule) {
+    if (isDiscoveryAlive(settings, logger)) {
+      logger.trace("Adding {} discovery type", KUBERNETES);
+      discoveryModule.addDiscoveryType(KUBERNETES, ZenDiscovery.class);
+      discoveryModule.addUnicastHostProvider(KUBERNETES, KubernetesUnicastHostsProvider.class);
+
     }
-
-    if (!checkProperty(KubernetesAPIService.Fields.NAMESPACE, settings.get(KubernetesAPIService.Fields.NAMESPACE), logger) ||
-      !checkProperty(KubernetesAPIService.Fields.SERVICE_NAME, settings.get(KubernetesAPIService.Fields.SERVICE_NAME), logger)) {
-      logger.debug("one or more Kubernetes discovery settings are missing. " +
-          "Check elasticsearch.yml file. Should have [{}] and [{}].",
-        KubernetesAPIService.Fields.NAMESPACE,
-        KubernetesAPIService.Fields.SERVICE_NAME);
-      return false;
-    }
-
-    logger.trace("all required properties for Kubernetes discovery are set!");
-
-    return true;
-  }
-
-  private static boolean checkProperty(String name, String value, ESLogger logger) {
-    if (!Strings.hasText(value)) {
-      logger.warn("{} is not set.", name);
-      return false;
-    }
-    return true;
   }
 
   @Override
-  public String name() {
-    return "cloud-kubernetes";
-  }
-
-  @Override
-  public String description() {
-    return "Cloud Kubernetes Discovery Plugin";
-  }
-
-  @Override
-  public Collection<Module> nodeModules() {
+  public Collection<Module> createGuiceModules() {
     List<Module> modules = new ArrayList<>();
     if (isDiscoveryAlive(settings, logger)) {
-      modules.add(new KubernetesModule());
+      modules.add(new KubernetesModule(settings));
     }
     return modules;
   }
 
   @Override
-  public Collection<Class<? extends LifecycleComponent>> nodeServices() {
+  @SuppressWarnings("rawtypes") // Supertype uses raw type
+  public Collection<Class<? extends LifecycleComponent>> getGuiceServiceClasses() {
+    logger.debug("Register kubernetes discovery service");
     Collection<Class<? extends LifecycleComponent>> services = new ArrayList<>();
     if (isDiscoveryAlive(settings, logger)) {
-      services.add(KubernetesModule.getComputeServiceImpl());
+      services.add(KubernetesModule.getKubernetesServiceImpl());
     }
     return services;
   }
 
-  public void onModule(DiscoveryModule discoveryModule) {
-    if (isDiscoveryAlive(settings, logger)) {
-      discoveryModule.addDiscoveryType("kubernetes", KubernetesDiscovery.class);
-      discoveryModule.addUnicastHostProvider(KubernetesUnicastHostsProvider.class);
+  @Override
+  public List<Setting<?>> getSettings() {
+    return Arrays.asList(
+      // Register Kubernetes Settings
+      KubernetesAPIService.NAME_SPACE_SETTING,
+      KubernetesAPIService.SERVICE_NAME_SETTING,
+      KubernetesAPIService.REFRESH_SETTING,
+      KubernetesAPIService.RETRY_SETTING,
+      KubernetesAPIService.MAX_WAIT_SETTING);
+  }
+
+  @Override
+  public void close() throws IOException {
+    IOUtils.close(kubernetesAPIService.get());
+  }
+
+
+  public static boolean isDiscoveryAlive(Settings settings, Logger logger) {
+    // User set discovery.type: kubernetes
+    if (!KubernetesDiscoveryPlugin.KUBERNETES.equalsIgnoreCase(DiscoveryModule.DISCOVERY_TYPE_SETTING.get(settings))) {
+      logger.debug("discovery.type not set to {}", KubernetesDiscoveryPlugin.KUBERNETES);
+      return false;
+    }
+
+    if (isDefined(settings, KubernetesAPIService.NAME_SPACE_SETTING) &&
+      isDefined(settings, KubernetesAPIService.SERVICE_NAME_SETTING)) {
+      logger.trace("All required properties for Kubernetes discovery are set!");
+      return true;
+    } else {
+      logger.debug("One or more Kubernetes discovery settings are missing. " +
+          "Check elasticsearch.yml file. Should have [{}] and [{}].",
+        KubernetesAPIService.NAME_SPACE_SETTING.getKey(),
+        KubernetesAPIService.SERVICE_NAME_SETTING.getKey());
+      return false;
     }
   }
+
+  private static boolean isDefined(Settings settings, Setting<String> property) throws ElasticsearchException {
+    return (property.exists(settings) && Strings.hasText(property.get(settings)));
+  }
+
 }

@@ -14,20 +14,29 @@
  * limitations under the License.
  */
 package io.fabric8.elasticsearch.cloud.kubernetes;
-
+import org.apache.logging.log4j.Logger;
 import org.elasticsearch.common.inject.AbstractModule;
+import org.elasticsearch.common.logging.Loggers;
+import org.elasticsearch.common.settings.Settings;
 
 public class KubernetesModule extends AbstractModule {
+  protected final Settings settings;
+  protected final Logger logger = Loggers.getLogger(KubernetesModule.class);
+
+  public KubernetesModule(Settings settings) {
+    this.settings = settings;
+  }
 
   // pkg private so tests can override with mock
   static Class<? extends KubernetesAPIService> kubernetesAPIServiceImpl = KubernetesAPIServiceImpl.class;
 
-  public static Class<? extends KubernetesAPIService> getComputeServiceImpl() {
+  public static Class<? extends KubernetesAPIService> getKubernetesServiceImpl() {
     return kubernetesAPIServiceImpl;
   }
 
   @Override
   protected void configure() {
+    logger.debug("configure KubernetesModule (bind Kubernetes API service)");
     bind(KubernetesAPIService.class).to(kubernetesAPIServiceImpl).asEagerSingleton();
   }
 }

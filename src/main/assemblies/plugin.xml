@@ -25,22 +25,23 @@
   <files>
     <file>
       <source>${basedir}/src/main/plugin-metadata/plugin-security.policy</source>
-      <outputDirectory></outputDirectory>
+      <outputDirectory>elasticsearch</outputDirectory>
       <filtered>false</filtered>
     </file>
     <file>
       <source>${basedir}/src/main/plugin-metadata/plugin-descriptor.properties</source>
-      <outputDirectory></outputDirectory>
+      <outputDirectory>elasticsearch</outputDirectory>
       <filtered>true</filtered>
     </file>
   </files>
   <dependencySets>
     <dependencySet>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>elasticsearch</outputDirectory>
       <useProjectArtifact>true</useProjectArtifact>
       <useTransitiveFiltering>true</useTransitiveFiltering>
       <excludes>
         <exclude>org.elasticsearch:elasticsearch</exclude>
+        <exclude>org.apache.logging.log4</exclude>
       </excludes>
     </dependencySet>
   </dependencySets>
