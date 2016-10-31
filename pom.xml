@@ -253,23 +253,4 @@
       </plugin>
     </plugins>
   </build>
-  <!--
-  Default sample commands:
-  mvn -Pdocker-build         ... build Docker images
-  mvn -Pdocker-deploy        ... docker-build + push to Docker registry
-  -->
-  <profiles>
-    <profile>
-      <id>docker-build</id>
-      <build>
-        <defaultGoal>clean install docker:build</defaultGoal>
-      </build>
-    </profile>
-    <profile>
-      <id>docker-deploy</id>
-      <build>
-        <defaultGoal>clean install docker:build docker:push</defaultGoal>
-      </build>
-    </profile>
-  </profiles>
 </project>
