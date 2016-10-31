@@ -27,16 +27,33 @@
         <include>elasticsearch.yml</include>
       </includes>
     </fileSet>
+    <fileSet>
+      <directory>${basedir}/src/main/plugin-metadata</directory>
+      <outputDirectory>/plugins/discovery-kubernetes</outputDirectory>
+      <includes>
+        <include>plugin-security.policy</include>
+      </includes>
+      <filtered>false</filtered>
+    </fileSet>
+    <fileSet>
+      <directory>${basedir}/src/main/plugin-metadata</directory>
+      <outputDirectory>/plugins/discovery-kubernetes</outputDirectory>
+      <includes>
+        <include>plugin-descriptor.properties</include>
+      </includes>
+      <filtered>true</filtered>
+    </fileSet>
   </fileSets>
 
   <dependencySets>
     <dependencySet>
-      <outputDirectory>/plugins/cloud-kubernetes</outputDirectory>
-      <useProjectAttachments>true</useProjectAttachments>
-      <includes>
-        <include>io.fabric8:elasticsearch-cloud-kubernetes:zip</include>
-      </includes>
-      <unpack>true</unpack>
+      <outputDirectory>/plugins/discovery-kubernetes</outputDirectory>
+      <useProjectArtifact>true</useProjectArtifact>
+      <useTransitiveFiltering>true</useTransitiveFiltering>
+      <excludes>
+        <exclude>org.elasticsearch:elasticsearch</exclude>
+        <exclude>org.apache.logging.log4</exclude>
+      </excludes>
     </dependencySet>
   </dependencySets>
 

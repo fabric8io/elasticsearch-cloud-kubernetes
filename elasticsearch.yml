@@ -27,5 +27,4 @@ cloud:
 discovery:
   type: kubernetes
 
-path:
-  plugins: /usr/share/elasticsearch/plugins
+plugin.mandatory: discovery-kubernetes

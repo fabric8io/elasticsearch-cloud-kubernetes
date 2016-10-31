@@ -199,7 +199,7 @@
       <plugin>
         <groupId>io.fabric8</groupId>
         <artifactId>docker-maven-plugin</artifactId>
-        <version>0.15.7</version>
+        <version>0.17.1</version>
         <configuration>
           <images>
             <image>
@@ -219,7 +219,7 @@
                 <env>
                   <NODE_DATA>true</NODE_DATA>
                   <NODE_MASTER>true</NODE_MASTER>
-                  <JAVA_OPTS>-Djava.net.preferIPv4Stack=true</JAVA_OPTS>
+                  <ES_JAVA_OPTS>-Xms512m -Xmx512m</ES_JAVA_OPTS>
                 </env>
               </build>
             </image>
@@ -253,23 +253,4 @@
       </plugin>
     </plugins>
   </build>
-  <!--
-  Default sample commands:
-  mvn -Pdocker-build         ... build Docker images
-  mvn -Pdocker-deploy        ... docker-build + push to Docker registry
-  -->
-  <profiles>
-    <profile>
-      <id>docker-build</id>
-      <build>
-        <defaultGoal>clean install docker:build</defaultGoal>
-      </build>
-    </profile>
-    <profile>
-      <id>docker-deploy</id>
-      <build>
-        <defaultGoal>clean install docker:build docker:push</defaultGoal>
-      </build>
-    </profile>
-  </profiles>
 </project>
