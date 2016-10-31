@@ -20,7 +20,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.fabric8</groupId>
   <artifactId>elasticsearch-cloud-kubernetes</artifactId>
-  <version>5.0.0</version>
+  <version>5.0.0-SNAPSHOT</version>
 
   <name>Elasticsearch Kubernetes cloud plugin</name>
   <description>The Kubernetes Cloud plugin allows to use Kubernetes for the unicast discovery mechanism.</description>
@@ -44,7 +44,7 @@
     <connection>scm:git:git@github.com:fabric8io/elasticsearch-cloud-kubernetes.git</connection>
     <developerConnection>scm:git:git@github.com:fabric8io/elasticsearch-cloud-kubernetes.git</developerConnection>
     <url>http://github.com/fabric8io/elasticsearch-cloud-kubernetes</url>
-    <tag>elasticsearch-cloud-kubernetes-5.0.0</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <issueManagement>
@@ -59,7 +59,7 @@
     <lucene.version>6.2.0</lucene.version>
     <tests.shuffle>true</tests.shuffle>
     <tests.output>onerror</tests.output>
-    <tests.client.ratio />
+    <tests.client.ratio/>
     <es.plugin.port>9300</es.plugin.port>
     <es.logger.level>INFO</es.logger.level>
     <es.config>${project.build.testOutputDirectory}/elasticsearch.yml</es.config>
