@@ -22,25 +22,32 @@
     <format>zip</format>
   </formats>
   <includeBaseDirectory>false</includeBaseDirectory>
-  <files>
-    <file>
-      <source>${basedir}/src/main/plugin-metadata/plugin-security.policy</source>
-      <outputDirectory></outputDirectory>
+  <fileSets>
+    <fileSet>
+      <directory>${basedir}/src/main/plugin-metadata</directory>
+      <outputDirectory>elasticsearch</outputDirectory>
+      <includes>
+        <include>plugin-security.policy</include>
+      </includes>
       <filtered>false</filtered>
-    </file>
-    <file>
-      <source>${basedir}/src/main/plugin-metadata/plugin-descriptor.properties</source>
-      <outputDirectory></outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${basedir}/src/main/plugin-metadata</directory>
+      <outputDirectory>elasticsearch</outputDirectory>
+      <includes>
+        <include>plugin-descriptor.properties</include>
+      </includes>
       <filtered>true</filtered>
-    </file>
-  </files>
+    </fileSet>
+  </fileSets>
   <dependencySets>
     <dependencySet>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>elasticsearch</outputDirectory>
       <useProjectArtifact>true</useProjectArtifact>
       <useTransitiveFiltering>true</useTransitiveFiltering>
       <excludes>
         <exclude>org.elasticsearch:elasticsearch</exclude>
+        <exclude>org.apache.logging.log4</exclude>
       </excludes>
     </dependencySet>
   </dependencySets>

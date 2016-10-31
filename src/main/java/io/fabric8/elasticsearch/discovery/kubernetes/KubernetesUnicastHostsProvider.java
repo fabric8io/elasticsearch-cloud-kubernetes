@@ -17,6 +17,8 @@ package io.fabric8.elasticsearch.discovery.kubernetes;
 
 import io.fabric8.elasticsearch.cloud.kubernetes.KubernetesAPIService;
 import io.fabric8.kubernetes.api.model.Endpoints;
+
+import org.elasticsearch.SpecialPermission;
 import org.elasticsearch.Version;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.component.AbstractComponent;
@@ -39,7 +41,6 @@ import java.util.List;
 
 public class KubernetesUnicastHostsProvider extends AbstractComponent implements UnicastHostsProvider {
 
-  private final Version version;
   private final String namespace;
   private final String serviceName;
   private final TimeValue refreshInterval;
@@ -53,17 +54,15 @@ public class KubernetesUnicastHostsProvider extends AbstractComponent implements
   public KubernetesUnicastHostsProvider(Settings settings,
                                         KubernetesAPIService kubernetesAPIService,
                                         TransportService transportService,
-                                        NetworkService networkService,
-                                        Version version) {
+                                        NetworkService networkService) {
     super(settings);
     this.transportService = transportService;
     this.networkService = networkService;
     this.kubernetesAPIService = kubernetesAPIService;
-    this.version = version;
 
-    this.refreshInterval = settings.getAsTime(KubernetesAPIService.Fields.REFRESH, TimeValue.timeValueSeconds(0));
-    this.namespace = settings.get(KubernetesAPIService.Fields.NAMESPACE);
-    this.serviceName = settings.get(KubernetesAPIService.Fields.SERVICE_NAME);
+    this.refreshInterval = KubernetesAPIService.REFRESH_SETTING.get(settings);
+    this.namespace = KubernetesAPIService.NAME_SPACE_SETTING.get(settings);
+    this.serviceName = KubernetesAPIService.SERVICE_NAME_SETTING.get(settings);
   }
 
   /**
@@ -75,20 +74,29 @@ public class KubernetesUnicastHostsProvider extends AbstractComponent implements
   @Override
   public List<DiscoveryNode> buildDynamicNodes() {
     final List<DiscoveryNode> result = new ArrayList<>();
-    AccessController.
-      doPrivileged((PrivilegedAction) () -> {
+    // ES permission you should check before doPrivileged() blocks
+    SecurityManager sm = System.getSecurityManager();
+    if (sm != null) {
+      sm.checkPermission(new SpecialPermission());
+    }
+
+    AccessController.doPrivileged(new PrivilegedAction<Void>() {
+      @Override
+      public Void run() {
         result.addAll(readNodes());
         return null;
-      });
+      }
+    });
 
     return result;
   }
 
   private List<DiscoveryNode> readNodes() {
+
     if (refreshInterval.millis() != 0) {
       if (cachedDiscoNodes != null &&
         (refreshInterval.millis() < 0 || (System.currentTimeMillis() - lastRefresh) < refreshInterval.millis())) {
-        if (logger.isTraceEnabled()) logger.trace("using cache to retrieve node list");
+        logger.trace("using cache to retrieve node list");
         return cachedDiscoNodes;
       }
       lastRefresh = System.currentTimeMillis();
@@ -106,6 +114,7 @@ public class KubernetesUnicastHostsProvider extends AbstractComponent implements
       // We can't find the publish host address... Hmmm. Too bad :-(
       // We won't simply filter it
     }
+
     final String ipAddress = tmpIPAddress;
 
     try {
@@ -126,14 +135,13 @@ public class KubernetesUnicastHostsProvider extends AbstractComponent implements
                 // We can ignore it in the list of DiscoveryNode
                 logger.trace("current node found. Ignoring {}", ipAddress);
               } else {
-
                 endpointSubset.getPorts().stream().forEach((port) -> {
                   try {
                     TransportAddress[] addresses = transportService.addressesFromString(formattedEndpointAddress + ":" + port.getPort(), 1);
 
                     for (TransportAddress transportAddress : addresses) {
                       logger.info("adding endpoint {}, transport_address {}", endpointAddress, transportAddress);
-                      cachedDiscoNodes.add(new DiscoveryNode("#cloud-" + endpointAddress + "-" + 0, transportAddress, version.minimumCompatibilityVersion()));
+                      cachedDiscoNodes.add(new DiscoveryNode("#cloud-" + endpointAddress + "-" + 0, transportAddress, Version.CURRENT.minimumCompatibilityVersion()));
                     }
                   } catch (Exception e) {
                     logger.warn("failed to add endpoint {}", e, endpointAddress);

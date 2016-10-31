@@ -23,8 +23,7 @@ import org.elasticsearch.common.component.AbstractLifecycleComponent;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
 
-public class KubernetesAPIServiceImpl extends AbstractLifecycleComponent<KubernetesAPIService>
-  implements KubernetesAPIService {
+public class KubernetesAPIServiceImpl extends AbstractLifecycleComponent implements KubernetesAPIService {
 
   private final String namespace;
   private final String serviceName;
@@ -40,8 +39,8 @@ public class KubernetesAPIServiceImpl extends AbstractLifecycleComponent<Kuberne
   @Inject
   public KubernetesAPIServiceImpl(Settings settings) {
     super(settings);
-    this.namespace = settings.get(Fields.NAMESPACE);
-    this.serviceName = settings.get(Fields.SERVICE_NAME);
+    this.namespace = NAME_SPACE_SETTING.get(settings);
+    this.serviceName = SERVICE_NAME_SETTING.get(settings);
   }
 
   public synchronized KubernetesClient client() {
