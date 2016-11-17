@@ -54,7 +54,7 @@
 
   <properties>
     <elasticsearch.plugin.name>discovery-kubernetes</elasticsearch.plugin.name>
-    <elasticsearch.version>5.0.0</elasticsearch.version>
+    <elasticsearch.version>5.0.1</elasticsearch.version>
     <kubernetes-client.version>1.4.4</kubernetes-client.version>
     <lucene.version>6.2.0</lucene.version>
     <tests.shuffle>true</tests.shuffle>
