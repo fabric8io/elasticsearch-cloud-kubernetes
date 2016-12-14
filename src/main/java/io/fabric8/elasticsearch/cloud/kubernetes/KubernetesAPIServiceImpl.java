@@ -18,12 +18,12 @@ package io.fabric8.elasticsearch.cloud.kubernetes;
 import io.fabric8.kubernetes.api.model.Endpoints;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.common.component.AbstractLifecycleComponent;
-import org.elasticsearch.common.inject.Inject;
+import org.elasticsearch.common.component.AbstractComponent;
 import org.elasticsearch.common.settings.Settings;
 
-public class KubernetesAPIServiceImpl extends AbstractLifecycleComponent implements KubernetesAPIService {
+import java.io.Closeable;
+
+public class KubernetesAPIServiceImpl extends AbstractComponent implements KubernetesAPIService, Closeable {
 
   private final String namespace;
   private final String serviceName;
@@ -36,7 +36,6 @@ public class KubernetesAPIServiceImpl extends AbstractLifecycleComponent impleme
 
   private KubernetesClient client;
 
-  @Inject
   public KubernetesAPIServiceImpl(Settings settings) {
     super(settings);
     this.namespace = NAME_SPACE_SETTING.get(settings);
@@ -51,17 +50,10 @@ public class KubernetesAPIServiceImpl extends AbstractLifecycleComponent impleme
   }
 
   @Override
-  protected void doStart() throws ElasticsearchException {
-  }
-
-  @Override
-  protected void doStop() throws ElasticsearchException {
+  public void close() {
     if (client != null) {
       client.close();
     }
   }
 
-  @Override
-  protected void doClose() throws ElasticsearchException {
-  }
 }

@@ -20,6 +20,7 @@ import org.elasticsearch.common.logging.Loggers;
 import org.elasticsearch.common.settings.Settings;
 
 public class KubernetesModule extends AbstractModule {
+
   protected final Settings settings;
   protected final Logger logger = Loggers.getLogger(KubernetesModule.class);
 
@@ -39,4 +40,5 @@ public class KubernetesModule extends AbstractModule {
     logger.debug("configure KubernetesModule (bind Kubernetes API service)");
     bind(KubernetesAPIService.class).to(kubernetesAPIServiceImpl).asEagerSingleton();
   }
+
 }
