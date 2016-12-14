@@ -56,7 +56,6 @@
     <elasticsearch.plugin.name>discovery-kubernetes</elasticsearch.plugin.name>
     <elasticsearch.version>5.0.1</elasticsearch.version>
     <kubernetes-client.version>1.4.4</kubernetes-client.version>
-    <lucene.version>6.2.0</lucene.version>
     <tests.shuffle>true</tests.shuffle>
     <tests.output>onerror</tests.output>
     <tests.client.ratio />
@@ -92,18 +91,6 @@
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
       <version>2.7</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-test-framework</artifactId>
-      <version>${lucene.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.elasticsearch.test</groupId>
-      <artifactId>framework</artifactId>
-      <version>${elasticsearch.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
