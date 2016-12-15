@@ -24,7 +24,6 @@ cloud:
     service: ${SERVICE}
     namespace: ${KUBERNETES_NAMESPACE}
 
-discovery:
-  type: kubernetes
+discovery.zen.hosts_provider: kubernetes
 
 plugin.mandatory: discovery-kubernetes

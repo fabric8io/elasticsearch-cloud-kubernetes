@@ -28,37 +28,23 @@ RUN set -x \
   && chmod +x /usr/local/bin/gosu \
   && gosu nobody true
 
-# https://artifacts.elastic.co/GPG-KEY-elasticsearch
-RUN apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-keys 46095ACC8548582C1A2699A9D27D666CD88E42B4
-
-# https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-repositories.html
-# https://www.elastic.co/guide/en/elasticsearch/reference/5.0/deb.html
-RUN set -x \
-	&& apt-get update && apt-get install -y --no-install-recommends apt-transport-https && rm -rf /var/lib/apt/lists/* \
-	&& echo 'deb https://artifacts.elastic.co/packages/5.x/apt stable main' > /etc/apt/sources.list.d/elasticsearch.list
-
 ENV ELASTICSEARCH_VERSION 5.1.1
 
 RUN set -x \
-  && apt-get update \
-  && apt-get install -y --no-install-recommends elasticsearch=$ELASTICSEARCH_VERSION \
-  && rm -rf /var/lib/apt/lists/*
+  && cd /usr/share \
+  && wget -O- https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$ELASTICSEARCH_VERSION.tar.gz | tar xz \
+  && mv elasticsearch-$ELASTICSEARCH_VERSION elasticsearch \
+  && cd elasticsearch \
+  && adduser elasticsearch --uid 1001 --gid 0 \
+  && for path in ./data ./logs ./config ./config/scripts; do \
+    mkdir -p "$path" || true; \
+    chown -R elasticsearch:root "$path"; \
+    chmod 770 "$path"; \
+  done
 
 ENV PATH /usr/share/elasticsearch/bin:$PATH
 
 WORKDIR /usr/share/elasticsearch
-
-RUN set -ex \
-  && for path in \
-    ./data \
-    ./logs \
-    ./config \
-    ./config/scripts \
-  ; do \
-    mkdir -p "$path"; \
-    chown -R elasticsearch:elasticsearch "$path"; \
-    chmod 777 "$path"; \
-  done
 
 COPY config ./config
 
@@ -66,6 +52,7 @@ VOLUME /usr/share/elasticsearch/data
 
 COPY docker-entrypoint.sh /
 
+USER 1001
 EXPOSE 9200 9300
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["elasticsearch"]
