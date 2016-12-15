@@ -15,35 +15,40 @@
  */
 package io.fabric8.elasticsearch.plugin.discovery.kubernetes;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.*;
-
 import io.fabric8.elasticsearch.cloud.kubernetes.KubernetesAPIService;
 import io.fabric8.elasticsearch.cloud.kubernetes.KubernetesAPIServiceImpl;
-import io.fabric8.elasticsearch.cloud.kubernetes.KubernetesModule;
 import io.fabric8.elasticsearch.discovery.kubernetes.KubernetesUnicastHostsProvider;
-
 import org.apache.logging.log4j.Logger;
-import org.apache.lucene.util.IOUtils;
 import org.apache.lucene.util.SetOnce;
-import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.SpecialPermission;
-import org.elasticsearch.common.Strings;
-import org.elasticsearch.common.component.LifecycleComponent;
-import org.elasticsearch.common.inject.Module;
+import org.elasticsearch.cluster.service.ClusterService;
+import org.elasticsearch.common.logging.DeprecationLogger;
 import org.elasticsearch.common.logging.Loggers;
+import org.elasticsearch.common.network.NetworkService;
 import org.elasticsearch.common.settings.Setting;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.discovery.Discovery;
 import org.elasticsearch.discovery.DiscoveryModule;
+import org.elasticsearch.discovery.zen.UnicastHostsProvider;
 import org.elasticsearch.discovery.zen.ZenDiscovery;
 import org.elasticsearch.plugins.DiscoveryPlugin;
 import org.elasticsearch.plugins.Plugin;
+import org.elasticsearch.threadpool.ThreadPool;
+import org.elasticsearch.transport.TransportService;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
 
 
-public class KubernetesDiscoveryPlugin extends Plugin implements DiscoveryPlugin, Closeable {
+public class KubernetesDiscoveryPlugin extends Plugin implements DiscoveryPlugin {
   public static final String KUBERNETES = "kubernetes";
+
   private static Logger logger = Loggers.getLogger(KubernetesDiscoveryPlugin.class);
+  private static final DeprecationLogger deprecationLogger = new DeprecationLogger(logger);
+
   private final Settings settings;
   private final SetOnce<KubernetesAPIServiceImpl> kubernetesAPIService = new SetOnce<>();
 
@@ -54,39 +59,26 @@ public class KubernetesDiscoveryPlugin extends Plugin implements DiscoveryPlugin
     }
   }
 
-
   public KubernetesDiscoveryPlugin(Settings settings) {
     this.settings = settings;
-    logger.trace("Starting kubernetes discovery plugin...");
-  }
-
-  public void onModule(DiscoveryModule discoveryModule) {
-    if (isDiscoveryAlive(settings, logger)) {
-      logger.trace("Adding {} discovery type", KUBERNETES);
-      discoveryModule.addDiscoveryType(KUBERNETES, ZenDiscovery.class);
-      discoveryModule.addUnicastHostProvider(KUBERNETES, KubernetesUnicastHostsProvider.class);
-
-    }
+    logger.trace("Starting Kubernetes discovery plugin...");
   }
 
   @Override
-  public Collection<Module> createGuiceModules() {
-    List<Module> modules = new ArrayList<>();
-    if (isDiscoveryAlive(settings, logger)) {
-      modules.add(new KubernetesModule(settings));
-    }
-    return modules;
+  public Map<String, Supplier<Discovery>> getDiscoveryTypes(ThreadPool threadPool, TransportService transportService,
+                                                            ClusterService clusterService, UnicastHostsProvider hostsProvider) {
+    // this is for backcompat with pre 5.1, where users would set discovery.type to use ec2 hosts provider
+    return Collections.singletonMap(KUBERNETES, () ->
+      new ZenDiscovery(settings, threadPool, transportService, clusterService, hostsProvider));
   }
 
   @Override
-  @SuppressWarnings("rawtypes") // Supertype uses raw type
-  public Collection<Class<? extends LifecycleComponent>> getGuiceServiceClasses() {
-    logger.debug("Register kubernetes discovery service");
-    Collection<Class<? extends LifecycleComponent>> services = new ArrayList<>();
-    if (isDiscoveryAlive(settings, logger)) {
-      services.add(KubernetesModule.getKubernetesServiceImpl());
-    }
-    return services;
+  public Map<String, Supplier<UnicastHostsProvider>> getZenHostsProviders(TransportService transportService,
+                                                                          NetworkService networkService) {
+    return Collections.singletonMap(KUBERNETES, () -> {
+      kubernetesAPIService.set(new KubernetesAPIServiceImpl(settings));
+      return new KubernetesUnicastHostsProvider(settings, kubernetesAPIService.get(), transportService, networkService);
+    });
   }
 
   @Override
@@ -101,33 +93,19 @@ public class KubernetesDiscoveryPlugin extends Plugin implements DiscoveryPlugin
   }
 
   @Override
-  public void close() throws IOException {
-    IOUtils.close(kubernetesAPIService.get());
-  }
-
-
-  public static boolean isDiscoveryAlive(Settings settings, Logger logger) {
-    // User set discovery.type: kubernetes
-    if (!KubernetesDiscoveryPlugin.KUBERNETES.equalsIgnoreCase(DiscoveryModule.DISCOVERY_TYPE_SETTING.get(settings))) {
-      logger.debug("discovery.type not set to {}", KubernetesDiscoveryPlugin.KUBERNETES);
-      return false;
+  public Settings additionalSettings() {
+    // For 5.0, the hosts provider was "zen", but this was before the discovery.zen.hosts_provider
+    // setting existed. This check looks for the legacy setting, and sets hosts provider if set
+    final String discoveryType = DiscoveryModule.DISCOVERY_TYPE_SETTING.get(settings);
+    if (discoveryType.equals(KUBERNETES)) {
+      deprecationLogger.deprecated("Using " + DiscoveryModule.DISCOVERY_TYPE_SETTING.getKey() +
+        " setting to set hosts provider is deprecated. " +
+        "Set \"" + DiscoveryModule.DISCOVERY_HOSTS_PROVIDER_SETTING.getKey() + ": " + KUBERNETES + "\" instead");
+      if (DiscoveryModule.DISCOVERY_HOSTS_PROVIDER_SETTING.exists(settings) == false) {
+        return Settings.builder().put(DiscoveryModule.DISCOVERY_HOSTS_PROVIDER_SETTING.getKey(), KUBERNETES).build();
+      }
     }
-
-    if (isDefined(settings, KubernetesAPIService.NAME_SPACE_SETTING) &&
-      isDefined(settings, KubernetesAPIService.SERVICE_NAME_SETTING)) {
-      logger.trace("All required properties for Kubernetes discovery are set!");
-      return true;
-    } else {
-      logger.debug("One or more Kubernetes discovery settings are missing. " +
-          "Check elasticsearch.yml file. Should have [{}] and [{}].",
-        KubernetesAPIService.NAME_SPACE_SETTING.getKey(),
-        KubernetesAPIService.SERVICE_NAME_SETTING.getKey());
-      return false;
-    }
-  }
-
-  private static boolean isDefined(Settings settings, Setting<String> property) throws ElasticsearchException {
-    return (property.exists(settings) && Strings.hasText(property.get(settings)));
+    return Settings.EMPTY;
   }
 
 }

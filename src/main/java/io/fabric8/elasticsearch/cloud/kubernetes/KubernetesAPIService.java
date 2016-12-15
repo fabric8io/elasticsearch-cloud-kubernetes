@@ -16,13 +16,12 @@
 package io.fabric8.elasticsearch.cloud.kubernetes;
 
 import io.fabric8.kubernetes.api.model.Endpoints;
-import org.elasticsearch.common.component.LifecycleComponent;
 import org.elasticsearch.common.settings.Setting;
 import org.elasticsearch.common.settings.Setting.Property;
 import org.elasticsearch.common.unit.TimeValue;
 
 
-public interface KubernetesAPIService extends LifecycleComponent {
+public interface KubernetesAPIService {
 
   String VERSION = "Elasticsearch/KubernetesCloud/1.0";
   Setting<String> NAME_SPACE_SETTING = Setting.simpleString("cloud.kubernetes.namespace", Property.NodeScope);
@@ -30,6 +29,7 @@ public interface KubernetesAPIService extends LifecycleComponent {
   Setting<TimeValue> REFRESH_SETTING = Setting.timeSetting("cloud.kubernetes.refresh_interval", TimeValue.timeValueSeconds(0), Property.NodeScope);
   Setting<Boolean> RETRY_SETTING = Setting.boolSetting("cloud.kubernetes.retry", true, Property.NodeScope);
   Setting<TimeValue> MAX_WAIT_SETTING = Setting.timeSetting("cloud.kubernetes.max_wait", TimeValue.timeValueSeconds(-1), Property.NodeScope);
+
   /**
    * Return a collection of IP addresses for the service endpoints
    *
