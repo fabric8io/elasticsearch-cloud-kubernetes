@@ -24,6 +24,7 @@ import org.elasticsearch.SpecialPermission;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.logging.DeprecationLogger;
 import org.elasticsearch.common.logging.Loggers;
+import org.elasticsearch.common.io.stream.NamedWriteableRegistry;
 import org.elasticsearch.common.network.NetworkService;
 import org.elasticsearch.common.settings.Setting;
 import org.elasticsearch.common.settings.Settings;
@@ -66,10 +67,10 @@ public class KubernetesDiscoveryPlugin extends Plugin implements DiscoveryPlugin
 
   @Override
   public Map<String, Supplier<Discovery>> getDiscoveryTypes(ThreadPool threadPool, TransportService transportService,
-                                                            ClusterService clusterService, UnicastHostsProvider hostsProvider) {
+                                                            NamedWriteableRegistry namedWriteableRegistry, ClusterService clusterService, UnicastHostsProvider hostsProvider) {
     // this is for backcompat with pre 5.1, where users would set discovery.type to use ec2 hosts provider
     return Collections.singletonMap(KUBERNETES, () ->
-      new ZenDiscovery(settings, threadPool, transportService, clusterService, hostsProvider));
+      new ZenDiscovery(settings, threadPool, transportService, namedWriteableRegistry, clusterService, hostsProvider));
   }
 
   @Override
