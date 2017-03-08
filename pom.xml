@@ -20,7 +20,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.fabric8</groupId>
   <artifactId>elasticsearch-cloud-kubernetes</artifactId>
-  <version>5.2.2</version>
+  <version>5.2.2-SNAPSHOT</version>
 
   <name>Elasticsearch Kubernetes cloud plugin</name>
   <description>The Kubernetes Cloud plugin allows to use Kubernetes for the unicast discovery mechanism.</description>
