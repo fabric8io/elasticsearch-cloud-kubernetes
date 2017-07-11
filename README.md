@@ -31,8 +31,7 @@ cloud:
   kubernetes:
     service: ${SERVICE}
     namespace: ${NAMESPACE}
-discovery:
-  type: kubernetes
+discovery.zen.hosts_provider: kubernetes
 
 path:
   data: /data/data
