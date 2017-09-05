@@ -53,12 +53,13 @@ public class KubernetesDiscoveryPlugin extends Plugin {
       return false;
     }
 
-    if (!checkProperty(KubernetesAPIService.Fields.NAMESPACE, settings.get(KubernetesAPIService.Fields.NAMESPACE), logger) ||
-      !checkProperty(KubernetesAPIService.Fields.SERVICE_NAME, settings.get(KubernetesAPIService.Fields.SERVICE_NAME), logger)) {
+    if ( !hasNamespace(settings, logger) || !(hasServiceName(settings, logger) ^ hasPodLabel(settings, logger)) ) {
       logger.debug("one or more Kubernetes discovery settings are missing. " +
-          "Check elasticsearch.yml file. Should have [{}] and [{}].",
+          "Check elasticsearch.yml file. Should have [{}] and only one of [{}] or [{} : {}].",
         KubernetesAPIService.Fields.NAMESPACE,
-        KubernetesAPIService.Fields.SERVICE_NAME);
+        KubernetesAPIService.Fields.SERVICE_NAME,
+        KubernetesAPIService.Fields.POD_LABEL,
+        KubernetesAPIService.Fields.POD_PORT);
       return false;
     }
 
@@ -67,11 +68,25 @@ public class KubernetesDiscoveryPlugin extends Plugin {
     return true;
   }
 
+  private static boolean hasNamespace(Settings settings, ESLogger logger) {
+    return checkProperty(KubernetesAPIService.Fields.NAMESPACE, settings.get(KubernetesAPIService.Fields.NAMESPACE), logger);
+  }
+ 
+  private static boolean hasServiceName(Settings settings, ESLogger logger) {
+    return checkProperty(KubernetesAPIService.Fields.SERVICE_NAME, settings.get(KubernetesAPIService.Fields.SERVICE_NAME), logger);
+  }
+ 
+  private static boolean hasPodLabel(Settings settings, ESLogger logger) {
+    return checkProperty(KubernetesAPIService.Fields.POD_LABEL, settings.get(KubernetesAPIService.Fields.POD_LABEL), logger) &&
+           checkProperty(KubernetesAPIService.Fields.POD_PORT, settings.get(KubernetesAPIService.Fields.POD_PORT), logger);
+  }
+  
   private static boolean checkProperty(String name, String value, ESLogger logger) {
     if (!Strings.hasText(value)) {
-      logger.warn("{} is not set.", name);
+      logger.debug("{} is not set.", name);
       return false;
     }
+    logger.debug("{} is set.", name);
     return true;
   }
 

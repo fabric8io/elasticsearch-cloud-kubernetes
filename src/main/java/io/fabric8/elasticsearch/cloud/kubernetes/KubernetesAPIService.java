@@ -16,6 +16,10 @@
 package io.fabric8.elasticsearch.cloud.kubernetes;
 
 import io.fabric8.kubernetes.api.model.Endpoints;
+import io.fabric8.kubernetes.api.model.Pod;
+
+import java.util.List;
+
 import org.elasticsearch.common.component.LifecycleComponent;
 
 public interface KubernetesAPIService extends LifecycleComponent<KubernetesAPIService> {
@@ -26,10 +30,18 @@ public interface KubernetesAPIService extends LifecycleComponent<KubernetesAPISe
    * @return a collection of IP addresses for the service endpoints
    */
   Endpoints endpoints();
+  /**
+   * Return a collection of pods with specific label
+   *
+   * @return a collection of pods with specific label
+   */
+  List<Pod> pods();
 
   final class Fields {
     public static final String NAMESPACE = "cloud.kubernetes.namespace";
     public static final String SERVICE_NAME = "cloud.kubernetes.service";
+    public static final String POD_LABEL = "cloud.kubernetes.pod_label";
+    public static final String POD_PORT = "cloud.kubernetes.pod_port";
     public static final String REFRESH = "cloud.kubernetes.refresh_interval";
     public static final String VERSION = "Elasticsearch/KubernetesCloud/1.0";
 

@@ -16,8 +16,12 @@
 package io.fabric8.elasticsearch.cloud.kubernetes;
 
 import io.fabric8.kubernetes.api.model.Endpoints;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+
+import java.util.List;
+
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.common.component.AbstractLifecycleComponent;
 import org.elasticsearch.common.inject.Inject;
@@ -28,6 +32,7 @@ public class KubernetesAPIServiceImpl extends AbstractLifecycleComponent<Kuberne
 
   private final String namespace;
   private final String serviceName;
+  private final String podLabel;
 
   @Override
   public Endpoints endpoints() {
@@ -35,6 +40,13 @@ public class KubernetesAPIServiceImpl extends AbstractLifecycleComponent<Kuberne
     return client().endpoints().inNamespace(namespace).withName(serviceName).get();
   }
 
+  @Override
+  public List<Pod> pods() {
+    logger.debug("get endpoints with pod label {}, namespace {}", podLabel, namespace);
+    final String[] l = podLabel.split("=");
+    return client().pods().inNamespace(namespace).withLabel(l[0], l[1]).list().getItems();
+  }
+  
   private KubernetesClient client;
 
   @Inject
@@ -42,6 +54,7 @@ public class KubernetesAPIServiceImpl extends AbstractLifecycleComponent<Kuberne
     super(settings);
     this.namespace = settings.get(Fields.NAMESPACE);
     this.serviceName = settings.get(Fields.SERVICE_NAME);
+    this.podLabel = settings.get(Fields.POD_LABEL);
   }
 
   public synchronized KubernetesClient client() {

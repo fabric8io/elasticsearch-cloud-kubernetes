@@ -17,6 +17,8 @@ package io.fabric8.elasticsearch.discovery.kubernetes;
 
 import io.fabric8.elasticsearch.cloud.kubernetes.KubernetesAPIService;
 import io.fabric8.kubernetes.api.model.Endpoints;
+import io.fabric8.kubernetes.api.model.Pod;
+
 import org.elasticsearch.Version;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.component.AbstractComponent;
@@ -35,13 +37,17 @@ import java.net.UnknownHostException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class KubernetesUnicastHostsProvider extends AbstractComponent implements UnicastHostsProvider {
 
   private final Version version;
   private final String namespace;
   private final String serviceName;
+  private final String podLabel;
+  private final int podPort;
   private final TimeValue refreshInterval;
   private final KubernetesAPIService kubernetesAPIService;
   private TransportService transportService;
@@ -64,6 +70,12 @@ public class KubernetesUnicastHostsProvider extends AbstractComponent implements
     this.refreshInterval = settings.getAsTime(KubernetesAPIService.Fields.REFRESH, TimeValue.timeValueSeconds(0));
     this.namespace = settings.get(KubernetesAPIService.Fields.NAMESPACE);
     this.serviceName = settings.get(KubernetesAPIService.Fields.SERVICE_NAME);
+    this.podLabel = settings.get(KubernetesAPIService.Fields.POD_LABEL);
+    if(settings.get(KubernetesAPIService.Fields.POD_PORT) != null) {
+      this.podPort = Integer.parseInt(settings.get(KubernetesAPIService.Fields.POD_PORT));
+    } else {
+      this.podPort = 0;
+    }
   }
 
   /**
@@ -76,12 +88,75 @@ public class KubernetesUnicastHostsProvider extends AbstractComponent implements
   public List<DiscoveryNode> buildDynamicNodes() {
     final List<DiscoveryNode> result = new ArrayList<>();
     AccessController.
-      doPrivileged((PrivilegedAction) () -> {
+      doPrivileged((PrivilegedAction<Void>) () -> {
         result.addAll(readNodes());
         return null;
       });
 
     return result;
+  }
+  
+  private List<DiscoveryNode> getDiscoveryNodes(String formattedAddress, InetAddress address, int port) {
+    try {
+      TransportAddress[] addresses = transportService.addressesFromString(formattedAddress + ":" + port, 1);
+      return Arrays.stream(addresses).map( transportAddress-> {
+        logger.info("adding pod {}, transport_address {}", address, transportAddress);
+        return new DiscoveryNode("#cloud-" + address + "-" + 0, transportAddress, version.minimumCompatibilityVersion());
+      }).collect(Collectors.toList());
+    } catch (Exception e) {
+      logger.warn("failed to add endpoint {}", e, address);
+      return new ArrayList<>();
+    }
+  }
+  
+  private List<DiscoveryNode> mapToDiscoveryNodes(List<Pod> pods, String ipAddress) {
+  	List<DiscoveryNode> discoveryNodes = new ArrayList<>();
+    pods.stream().forEach(pod -> {
+      String ip = pod.getStatus().getPodIP();
+      try {
+        InetAddress podAddress = InetAddress.getByName(ip);
+        String formattedPodAddress = NetworkAddress.format(podAddress);
+        if (formattedPodAddress.equals(ipAddress)) {
+          // We found the current node.
+          // We can ignore it in the list of DiscoveryNode
+          logger.trace("current node found. Ignoring {}", podAddress);
+        } else {
+        	discoveryNodes.addAll(getDiscoveryNodes(formattedPodAddress, podAddress, this.podPort));
+        }
+      } catch (UnknownHostException e) {
+        logger.warn("Ignoring invalid pod IP address: {}", e, ip);
+      }
+    });
+    return discoveryNodes;
+  }
+
+  private List<DiscoveryNode> mapToDiscoveryNodes(Endpoints endpoints, String ipAddress) {
+    List<DiscoveryNode> discoveryNodes = new ArrayList<>();
+    endpoints.getSubsets().stream().forEach(endpointSubset -> {
+      endpointSubset.getAddresses().stream().forEach((address -> {
+        String ip = address.getIp();
+        try {
+          InetAddress endpointAddress = InetAddress.getByName(ip);
+          String formattedEndpointAddress = NetworkAddress.format(endpointAddress);
+          try {
+            if (formattedEndpointAddress.equals(ipAddress)) {
+              // We found the current node.
+              // We can ignore it in the list of DiscoveryNode
+              logger.trace("current node found. Ignoring {}", ipAddress);
+            } else {
+            	discoveryNodes.addAll( endpointSubset.getPorts().stream()
+              	.flatMap(port -> getDiscoveryNodes(formattedEndpointAddress, endpointAddress, port.getPort()).stream())
+              	.collect(Collectors.toList()) );
+            }
+          } catch (Exception e) {
+            logger.warn("failed to add endpoint {}", e, endpointAddress);
+          }
+        } catch (UnknownHostException e) {
+          logger.warn("Ignoring invalid endpoint IP address: {}", e, ip);
+        }
+      }));
+    });
+    return discoveryNodes;
   }
 
   private List<DiscoveryNode> readNodes() {
@@ -103,51 +178,30 @@ public class KubernetesUnicastHostsProvider extends AbstractComponent implements
         tmpIPAddress = NetworkAddress.format(inetAddress);
       }
     } catch (IOException e) {
+    	logger.warn("Unable to find the publish host address", e);
       // We can't find the publish host address... Hmmm. Too bad :-(
       // We won't simply filter it
     }
     final String ipAddress = tmpIPAddress;
 
     try {
-      Endpoints endpoints = kubernetesAPIService.endpoints();
-      if (endpoints == null || endpoints.getSubsets() == null || endpoints.getSubsets().isEmpty()) {
-        logger.warn("no endpoints found for service [{}], namespace [{}].", this.serviceName, this.namespace);
-        return cachedDiscoNodes;
+      final List<DiscoveryNode> discoveryNodes;
+      if(this.podLabel != null) {
+        List<Pod> pods = kubernetesAPIService.pods();
+        if (pods == null || pods.isEmpty()) {
+          logger.warn("no endpoints found for service [{}], namespace [{}].", this.serviceName, this.namespace);
+          return cachedDiscoNodes;
+        }
+        discoveryNodes = mapToDiscoveryNodes(pods, ipAddress);
+      } else {
+      	Endpoints endpoints = kubernetesAPIService.endpoints();
+        if (endpoints == null || endpoints.getSubsets() == null || endpoints.getSubsets().isEmpty()) {
+          logger.warn("no endpoints found for service [{}], namespace [{}].", this.serviceName, this.namespace);
+          return cachedDiscoNodes;
+        }
+        discoveryNodes = mapToDiscoveryNodes(endpoints, ipAddress);
       }
-      endpoints.getSubsets().stream().forEach((endpointSubset) -> {
-        endpointSubset.getAddresses().stream().forEach((address -> {
-          String ip = address.getIp();
-          try {
-            InetAddress endpointAddress = InetAddress.getByName(ip);
-            String formattedEndpointAddress = NetworkAddress.format(endpointAddress);
-            try {
-              if (formattedEndpointAddress.equals(ipAddress)) {
-                // We found the current node.
-                // We can ignore it in the list of DiscoveryNode
-                logger.trace("current node found. Ignoring {}", ipAddress);
-              } else {
-
-                endpointSubset.getPorts().stream().forEach((port) -> {
-                  try {
-                    TransportAddress[] addresses = transportService.addressesFromString(formattedEndpointAddress + ":" + port.getPort(), 1);
-
-                    for (TransportAddress transportAddress : addresses) {
-                      logger.info("adding endpoint {}, transport_address {}", endpointAddress, transportAddress);
-                      cachedDiscoNodes.add(new DiscoveryNode("#cloud-" + endpointAddress + "-" + 0, transportAddress, version.minimumCompatibilityVersion()));
-                    }
-                  } catch (Exception e) {
-                    logger.warn("failed to add endpoint {}", e, endpointAddress);
-                  }
-                });
-              }
-            } catch (Exception e) {
-              logger.warn("failed to add endpoint {}", e, endpointAddress);
-            }
-          } catch (UnknownHostException e) {
-            logger.warn("Ignoring invalid endpoint IP address: {}", e, ip);
-          }
-        }));
-      });
+      cachedDiscoNodes.addAll(discoveryNodes);
     } catch (Throwable e) {
       logger.warn("Exception caught during discovery: {}", e, e.getMessage());
     }
