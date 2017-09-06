@@ -141,20 +141,20 @@ public class KubernetesUnicastHostsProvider extends AbstractComponent implements
                       cachedDiscoNodes.add(new DiscoveryNode("#cloud-" + endpointAddress + "-" + 0, transportAddress, Version.CURRENT.minimumCompatibilityVersion()));
                     }
                   } catch (Exception e) {
-                    logger.warn("failed to add endpoint {}", e, endpointAddress);
+                    logger.warn("failed to add endpoint {}", endpointAddress, e);
                   }
                 });
               }
             } catch (Exception e) {
-              logger.warn("failed to add endpoint {}", e, endpointAddress);
+              logger.warn("failed to add endpoint {}", endpointAddress, e);
             }
           } catch (UnknownHostException e) {
-            logger.warn("Ignoring invalid endpoint IP address: {}", e, ip);
+            logger.warn("Ignoring invalid endpoint IP address: {}", ip, e);
           }
         }));
       });
     } catch (Throwable e) {
-      logger.warn("Exception caught during discovery: {}", e, e.getMessage());
+      logger.warn("Exception caught during discovery: {}", e.getMessage(), e);
     }
 
     logger.debug("{} node(s) added", cachedDiscoNodes.size());
