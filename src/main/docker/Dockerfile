@@ -28,7 +28,7 @@ RUN set -x \
   && chmod +x /usr/local/bin/gosu \
   && gosu nobody true
 
-ENV ELASTICSEARCH_VERSION 6.1.2
+ENV ELASTICSEARCH_VERSION 6.2.3
 
 RUN set -x \
   && cd /usr/share \

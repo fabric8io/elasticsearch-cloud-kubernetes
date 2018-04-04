@@ -8,7 +8,7 @@ The Kubernetes Cloud plugin allows to use Kubernetes API for the unicast discove
 Installation
 ============
 ```
-elasticsearch-plugin install io.fabric8:elasticsearch-cloud-kubernetes:6.1.2
+elasticsearch-plugin install io.fabric8:elasticsearch-cloud-kubernetes:6.2.3
 ```
 
 Versions available
@@ -81,11 +81,11 @@ The following manifest uses 3 replication controllers to created Elasticsearch p
 
 * master
 * data
-* client
+* coordinating-only
 
 We use 2 services as well:
 
-* One to target the client pods so that all requests to the cluster go through the client nodes
+* One to target the coordinating-only pods so that all requests to the cluster go through the coordinating-only nodes
 * A headless service to list all cluster endpoints managed by all 3 RCs.
 
 ```yaml
@@ -102,7 +102,7 @@ items:
         targetPort: "http"
     selector:
       component: "elasticsearch"
-      type: "client"
+      type: "coordinating-only"
       provider: "fabric8"
     type: "LoadBalancer"
 - apiVersion: "v1"
@@ -146,7 +146,7 @@ items:
                     fieldPath: "metadata.namespace"
               - name: "NODE_MASTER"
                 value: "false"
-            image: "fabric8/elasticsearch-k8s:6.1.2"
+            image: "fabric8/elasticsearch-k8s:6.2.3"
             name: "elasticsearch"
             ports:
               - containerPort: 9300
@@ -188,7 +188,7 @@ items:
                     fieldPath: "metadata.namespace"
               - name: "NODE_DATA"
                 value: "false"
-            image: "fabric8/elasticsearch-k8s:6.1.2"
+            image: "fabric8/elasticsearch-k8s:6.2.3"
             name: "elasticsearch"
             ports:
               - containerPort: 9300
@@ -196,18 +196,18 @@ items:
 - apiVersion: "v1"
   kind: "ReplicationController"
   metadata:
-    name: "elasticsearch-client"
+    name: "elasticsearch-coordinating-only"
   spec:
     replicas: 1
     selector:
       component: "elasticsearch"
-      type: "client"
+      type: "coordinating-only"
       provider: "fabric8"
     template:
       metadata:
         labels:
           component: "elasticsearch"
-          type: "client"
+          type: "coordinating-only"
           provider: "fabric8"
       spec:
         serviceAccount: elasticsearch
@@ -224,7 +224,7 @@ items:
                 value: "false"
               - name: "NODE_MASTER"
                 value: "false"
-            image: "fabric8/elasticsearch-k8s:6.1.2"
+            image: "fabric8/elasticsearch-k8s:6.2.3"
             name: "elasticsearch"
             ports:
               - containerPort: 9200
