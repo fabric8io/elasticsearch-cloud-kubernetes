@@ -16,10 +16,9 @@
 
 grant {
   permission java.lang.RuntimePermission "accessDeclaredMembers";
-  permission java.lang.RuntimePermission "setFactory";
   permission java.lang.RuntimePermission "accessClassInPackage.sun.security.ssl";
   permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
   permission java.io.FilePermission "<<ALL FILES>>", "read,execute,readlink";
   permission java.net.NetPermission "getProxySelector";
-  permission java.net.NetPermission "getCookieHandler";
+  permission java.net.SocketPermission "*", "resolve,connect";
 };
