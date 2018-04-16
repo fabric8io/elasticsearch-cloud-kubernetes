@@ -9,6 +9,7 @@ Installation
 ============
 ```
 elasticsearch-plugin install io.fabric8:elasticsearch-cloud-kubernetes:6.2.3
+
 ```
 
 Versions available
@@ -36,8 +37,6 @@ discovery.zen.hosts_provider: kubernetes
 path:
   data: /data/data
   logs: /data/log
-  plugins: /data/plugins
-  work: /data/work
 ```
 
 ## Kubernetes auth
@@ -146,6 +145,7 @@ items:
                     fieldPath: "metadata.namespace"
               - name: "NODE_MASTER"
                 value: "false"
+
             image: "fabric8/elasticsearch-k8s:6.2.3"
             name: "elasticsearch"
             ports:
@@ -188,6 +188,7 @@ items:
                     fieldPath: "metadata.namespace"
               - name: "NODE_DATA"
                 value: "false"
+
             image: "fabric8/elasticsearch-k8s:6.2.3"
             name: "elasticsearch"
             ports:
