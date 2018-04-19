@@ -25,7 +25,11 @@
   <description>The Kubernetes Cloud plugin allows to use Kubernetes for the unicast discovery mechanism.</description>
   <url>https://github.com/jimmidyson/elasticsearch-cloud-kubernetes/</url>
   <inceptionYear>2015</inceptionYear>
-
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>9</version>
+  </parent>
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
