@@ -51,7 +51,7 @@
 
   <properties>
     <elasticsearch.plugin.name>discovery-kubernetes</elasticsearch.plugin.name>
-    <elasticsearch.version>5.6.8</elasticsearch.version>
+    <elasticsearch.version>5.6.9</elasticsearch.version>
     <kubernetes-client.version>3.0.3</kubernetes-client.version>
     <tests.shuffle>true</tests.shuffle>
     <tests.output>onerror</tests.output>
