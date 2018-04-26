@@ -8,7 +8,7 @@ The Kubernetes Cloud plugin allows to use Kubernetes API for the unicast discove
 Installation
 ============
 ```
-elasticsearch-plugin install io.fabric8:elasticsearch-cloud-kubernetes:5.6.9
+elasticsearch-plugin install io.fabric8:elasticsearch-cloud-kubernetes:5.6.8
 
 ```
 
@@ -146,7 +146,7 @@ items:
               - name: "NODE_MASTER"
                 value: "false"
 
-            image: "fabric8/elasticsearch-k8s:5.6.9"
+            image: "fabric8/elasticsearch-k8s:5.6.8"
             name: "elasticsearch"
             ports:
               - containerPort: 9300
@@ -189,7 +189,7 @@ items:
               - name: "NODE_DATA"
                 value: "false"
 
-            image: "fabric8/elasticsearch-k8s:5.6.9"
+            image: "fabric8/elasticsearch-k8s:5.6.8"
             name: "elasticsearch"
             ports:
               - containerPort: 9300
@@ -225,7 +225,7 @@ items:
                 value: "false"
               - name: "NODE_MASTER"
                 value: "false"
-            image: "fabric8/elasticsearch-k8s:5.6.9"
+            image: "fabric8/elasticsearch-k8s:5.6.8"
             name: "elasticsearch"
             ports:
               - containerPort: 9200
