@@ -23,7 +23,7 @@
   <version>6.2.4-SNAPSHOT</version>
   <name>Elasticsearch Kubernetes cloud plugin</name>
   <description>The Kubernetes Cloud plugin allows to use Kubernetes for the unicast discovery mechanism.</description>
-  <url>https://github.com/jimmidyson/elasticsearch-cloud-kubernetes/</url>
+  <url>https://github.com/fabric8io/elasticsearch-cloud-kubernetes/</url>
   <inceptionYear>2015</inceptionYear>
   <parent>
     <groupId>org.sonatype.oss</groupId>
