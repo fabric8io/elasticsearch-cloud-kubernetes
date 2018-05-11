@@ -8,7 +8,7 @@ The Kubernetes Cloud plugin allows to use Kubernetes API for the unicast discove
 Installation
 ============
 ```
-elasticsearch-plugin install io.fabric8:elasticsearch-cloud-kubernetes:6.2.3
+elasticsearch-plugin install io.fabric8:elasticsearch-cloud-kubernetes:6.2.3.2
 
 ```
 
