@@ -1,9 +1,38 @@
-Kubernetes Cloud Plugin for Elasticsearch:
+﻿Kubernetes Cloud Plugin for Elasticsearch:
 =========================================
 
 [![Build Status](https://travis-ci.org/fabric8io/elasticsearch-cloud-kubernetes.svg?branch=master)](https://travis-ci.org/fabric8io/elasticsearch-cloud-kubernetes)
 
 The Kubernetes Cloud plugin allows to use Kubernetes API for the unicast discovery mechanism.
+Alternatively, you can utilize [headless services](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services):
+
+    apiVersion: v1
+    kind: Service
+    metadata:
+      annotations:
+        service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+      name: elasticsearch-cluster
+    spec:
+      clusterIP: None
+      ports:
+      - port: 9300
+        protocol: TCP
+        targetPort: 9300
+      publishNotReadyAddresses: true
+      selector:
+        component: es
+      sessionAffinity: None
+      type: ClusterIP
+ 
+ elasticsearch.yml:
+
+    ...
+        discovery.zen:
+          minimum_master_nodes: ${NODE_QUORUM}
+          ping.unicast.hosts: elasticsearch-cluster
+    ...
+
+**NOTE**: You are highly encouraged to use headless services as the they obsolete this plugin.
 
 Installation
 ============
