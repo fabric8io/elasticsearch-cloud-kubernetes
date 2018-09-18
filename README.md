@@ -1,4 +1,7 @@
-﻿Kubernetes Cloud Plugin for Elasticsearch:
+This plugin is no longer under active development and can be replaced by utilizing a headless service as noted below
+======
+
+Kubernetes Cloud Plugin for Elasticsearch:
 =========================================
 
 [![Build Status](https://travis-ci.org/fabric8io/elasticsearch-cloud-kubernetes.svg?branch=master)](https://travis-ci.org/fabric8io/elasticsearch-cloud-kubernetes)
